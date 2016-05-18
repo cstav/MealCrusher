@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using System.Linq;
 
 public class GridManager : MonoBehaviour
 {
@@ -21,8 +22,8 @@ public class GridManager : MonoBehaviour
 	//number of match sets at each check
 
 	//two tiles that were last swapped
-	GameObject lastTileMoved1;
-	GameObject lastTileMoved2;
+	Vector2 lastTileMoved1;
+	Vector2 lastTileMoved2;
 
 	PlayerInput playerinput;
 	ScoreHandler scorehandler;
@@ -30,6 +31,10 @@ public class GridManager : MonoBehaviour
 
 	void Awake ()
 	{
+
+		//set last tiles moved to a position not included in the grid
+		lastTileMoved1 = new Vector2 (-1, -1);
+		lastTileMoved2 = new Vector2 (-1, -1);
 
 		scorehandler = GameObject.Find ("scoretext").GetComponent<ScoreHandler> ();
 		playerinput = GameObject.Find ("GameController").GetComponent<PlayerInput> ();
@@ -44,7 +49,12 @@ public class GridManager : MonoBehaviour
 		tileColours [5] = "pepper";
 		tileColours [6] = "strawberry";
 
-		StartCoroutine (CreateGrid ());
+		if (Application.loadedLevel == 2) {
+			StartCoroutine (CreateGridTest ());
+		} else {
+			StartCoroutine (CreateGrid ());
+		}
+	
 
 
 	}
@@ -57,6 +67,122 @@ public class GridManager : MonoBehaviour
 		for (int y = GridHeight - 1; y >= 0; y--) {
 			for (int x = 0; x < GridWidth; x++) {
 				int randomTile = Random.Range (0, TilePrefabs.Length);
+
+				GameObject tile = Instantiate (TilePrefabs [randomTile], new Vector2 (x, y), Quaternion.identity) as GameObject;
+				tile.GetComponent<MoveScript> ().tileIndex = randomTile;
+				//float vol = Random.Range(0.2f,0.5f);
+				//source.PlayOneShot (pop,vol);
+				Grid [x, y] = tile;
+
+				//Assign the tile its colour
+				Grid [x, y].GetComponent<MoveScript> ().setColour (tileColours [randomTile]);
+				//give it its position in the grid
+				Grid [x, y].GetComponent<MoveScript> ().setGridPosition (new Vector2 (x, y));
+
+
+				yield return new WaitForSeconds (.02f);
+			}
+		}
+
+
+		StartCoroutine (continousCheck ());
+
+	}
+
+	IEnumerator CreateGridTest ()
+	{
+		//L shape
+		/*
+		int[,] testGrid = { {4,5,6,1,2,3,0,3},
+							{3,4,6,1,2,5,5,3},
+							{2,2,4,0,1,1,5,2},
+							{4,5,6,1,2,3,0,3},
+							{5,6,5,2,2,6,5,5},
+							{3,2,4,2,3,5,5,0},
+							{4,6,2,3,5,4,6,0},
+							{2,0,5,5,0,5,2,4}}; 
+							*/
+
+		//T shape
+		/*
+		int[,] testGrid = { {4,5,6,4,2,3,0,3},
+							{3,4,6,1,2,5,5,3},
+							{2,2,1,0,1,1,5,2},
+							{4,5,6,1,2,3,0,3},
+							{5,6,5,2,2,6,5,5},
+							{3,2,4,2,3,5,5,0},
+							{4,6,2,3,5,4,6,0},
+							{2,0,5,5,0,5,2,4}}; 
+							*/
+
+		//5 in a row
+		/*
+		int[,] testGrid = { {4,5,6,4,2,3,0,3},
+							{3,4,6,1,2,5,5,3},
+							{2,1,1,0,1,1,5,2},
+							{4,5,6,2,2,3,0,3},
+							{5,6,5,2,2,6,5,5},
+							{3,2,4,2,3,5,5,0},
+							{4,6,2,3,5,4,6,0},
+							{2,0,5,5,0,5,2,4}}; 
+		*/					
+
+		//4 in a row
+		/*
+		int[,] testGrid = { { 4, 5, 6, 4, 2, 3, 0, 3 },
+			{ 3, 4, 6, 1, 2, 5, 5, 3 },
+			{ 2, 4, 1, 0, 1, 1, 5, 2 },
+			{ 4, 5, 6, 2, 2, 3, 0, 3 },
+			{ 5, 6, 5, 2, 2, 6, 5, 5 },
+			{ 3, 2, 4, 2, 3, 5, 5, 0 },
+			{ 4, 6, 2, 3, 5, 4, 6, 0 },
+			{ 2, 0, 5, 5, 0, 5, 2, 4 }
+		}; 
+		*/
+
+		//4 after collapse
+		/*
+		int[,] testGrid = { { 4, 5, 6, 4, 2, 3, 0, 3 },
+							{ 3, 4, 6, 2, 2, 5, 5, 3 },
+							{ 2, 1, 1, 0, 1, 1, 5, 2 },
+							{ 4, 5, 6, 2, 2, 3, 0, 3 },
+							{ 5, 6, 3, 2, 2, 6, 5, 5 },
+							{ 3, 2, 4, 3, 3, 5, 5, 0 },
+							{ 4, 6, 6, 3, 6, 6, 2, 0 },
+							{ 2, 0, 5, 5, 0, 5, 2, 4 }
+						}; 
+						*/
+
+		//2 4's at once
+
+		int[,] testGrid = { { 4, 5, 6, 4, 2, 3, 0, 3 },
+			{ 3, 4, 6, 2, 2, 5, 5, 3 },
+			{ 2, 1, 1, 5, 1, 2, 5, 2 },
+			{ 4, 5, 5, 1, 5, 3, 0, 3 },
+			{ 5, 6, 3, 2, 2, 6, 5, 5 },
+			{ 3, 2, 4, 3, 3, 5, 5, 0 },
+			{ 4, 6, 6, 3, 6, 6, 2, 0 },
+			{ 2, 0, 5, 5, 0, 5, 2, 4 }
+		}; 
+											
+
+		/*
+		int[,] testGrid = { {1,1,1,1,1,1,1,1},
+							{1,1,0,1,1,1,1,3},
+							{1,1,1,1,1,1,1,1},
+							{1,1,0,1,1,1,1,3},
+							{1,1,1,1,1,1,1,1},
+							{1,1,1,1,1,1,1,1},
+							{1,1,1,1,1,1,1,1},
+							{1,1,1,1,1,1,1,1}}; 
+	*/
+
+		playerinput.currentState = GameState.Animating;
+		Grid = new GameObject[GridWidth, GridHeight];
+
+		for (int y = GridHeight - 1; y >= 0; y--) {
+			for (int x = 0; x < GridWidth; x++) {
+				int randomTile = testGrid [x, y];
 
 				GameObject tile = Instantiate (TilePrefabs [randomTile], new Vector2 (x, y), Quaternion.identity) as GameObject;
 				tile.GetComponent<MoveScript> ().tileIndex = randomTile;
@@ -106,7 +232,7 @@ public class GridManager : MonoBehaviour
 		List<Vector2> matchPositions = new List<Vector2> ();
 
 		//contains sets of matching tiles
-		List<Vector2>[] matchSets = new List<Vector2>[10]; 
+		List<Vector2>[] matchSets = new List<Vector2>[100]; 
 		index = 0;
 
 		string currentColour = "none";
@@ -202,9 +328,26 @@ public class GridManager : MonoBehaviour
 		return matchSets;
 	}
 
+	public void printMatchSets (List<Vector2>[] matchSets)
+	{
+
+		for (int i = 0; i < index; i++) {
+
+			string set = "";
+			foreach (Vector2 tPos in matchSets[i]) {
+				set += (tPos.x + ":" + tPos.y + ", ");
+			}
+			Debug.Log (set);
+		}
+
+
+	}
 
 	public void DestroyTiles (List<Vector2>[] matchSets)
 	{
+
+		printMatchSets (matchSets);
+
 		if (matchSets [0] != null) {
 			source.PlayOneShot (zap);
 		}
@@ -212,6 +355,39 @@ public class GridManager : MonoBehaviour
 
 
 		for (int i = 0; i < index; i++) {
+
+	
+
+			int matchCount = matchSets [i].Count;
+			Vector2 boosterPos = new Vector2 ();
+			bool boosterAdded = false;
+
+			//destroy all tiles in all sets
+			foreach (Vector2 tPos in matchSets[i]) {
+
+
+				//Boosters Code
+				switch (matchSets [i].Count) {
+				case 4:
+					if (tPos == lastTileMoved1 || tPos == lastTileMoved2) {
+						CreateNormalBooster (tPos);
+						boosterAdded = true;
+					} else if(tPos == matchSets[i].ElementAt(3) && boosterAdded == false){
+						CreateNormalBooster (tPos);
+					
+					}
+					else {
+						DestroyTile (tPos);	
+					}
+					break;
+				case 5:
+					scorehandler.AddPoints (200);
+					break;
+				default: 
+					DestroyTile (tPos);	
+					break;
+				}
+			}
 
 			//Award points for match
 			switch (matchSets [i].Count) {
@@ -227,55 +403,40 @@ public class GridManager : MonoBehaviour
 			default: 
 				break;
 			}
-
-			int matchCount = matchSets [i].Count;
-			Vector2 boosterPos = new Vector2();
-
-			//destroy all tiles in all sets
-			foreach (Vector2 tPos in matchSets[i]) {
-
-
-				if ((Grid [(int)tPos.x, (int)tPos.y] == lastTileMoved1 || Grid [(int)tPos.x, (int)tPos.y] == lastTileMoved2) && matchCount == 4) {
-					//store that position
-					//boosterPos = new Vector2 ((int)tPos.x, (int)tPos.y);
-					int tileType = (Grid [(int)tPos.x, (int)tPos.y]).GetComponent<MoveScript>().tileIndex;
-					Destroy (Grid [(int)tPos.x, (int)tPos.y]);
-					GameObject tile = Instantiate (TilePrefabs [tileType], new Vector2 ((int)tPos.x, (int)tPos.y), Quaternion.identity) as GameObject;
-					tile.GetComponent<MoveScript> ().setColour (tileColours[tileType]);
-					tile.GetComponent<MoveScript> ().isBooster = true;
-					tile.GetComponent<MoveScript> ().changeColor ();
-					tile.GetComponent<MoveScript> ().tileIndex = tileType;
-					Grid [(int)tPos.x, (int)tPos.y] = tile;
-
-
-				} else {
-					Destroy (Grid [(int)tPos.x, (int)tPos.y]);
-					Grid [(int)tPos.x, (int)tPos.y] = null;
-				}
-
-			}
-
-		
-			/*
-			if (matchCount == 4 && boosterPos != null) {
-
-				GameObject tile = Instantiate (boosterPrefabs [0], new Vector2 (boosterPos.x, boosterPos.y), Quaternion.identity) as GameObject;
-				Grid [(int)boosterPos.x, (int)boosterPos.y] = tile;
-			}
-			*/
 		}
+
+		//reset last tiles moved
+		lastTileMoved1 = new Vector2(-1,-1);
+		lastTileMoved2 = new Vector2 (-1, -1);
 	}
 
 		
-	public void CreateBooster(Vector2 Position){
+	public void DestroyTile(Vector2 tPos){
 
-		//chuck above code in here :)
+		Destroy (Grid [(int)tPos.x, (int)tPos.y]);
+		Grid [(int)tPos.x, (int)tPos.y] = null;
+	}
+
+
+	public void CreateNormalBooster (Vector2 tPos)
+	{
+
+		int tileType = (Grid [(int)tPos.x, (int)tPos.y]).GetComponent<MoveScript> ().tileIndex;
+		Destroy (Grid [(int)tPos.x, (int)tPos.y]);
+		GameObject tile = Instantiate (TilePrefabs [tileType], new Vector2 ((int)tPos.x, (int)tPos.y), Quaternion.identity) as GameObject;
+		tile.GetComponent<MoveScript> ().setColour (tileColours [tileType]);
+		tile.GetComponent<MoveScript> ().isBooster = true;
+		tile.GetComponent<MoveScript> ().changeColor ();
+		tile.GetComponent<MoveScript> ().tileIndex = tileType;
+		Grid [(int)tPos.x, (int)tPos.y] = tile;
+
+
 	}
 
 	public void SwapTiles (GameObject tile1, GameObject tile2)
 	{
-		lastTileMoved1 = tile1;
-		lastTileMoved2 = tile2;
+		lastTileMoved1 = new Vector2 (tile1.transform.position.x, tile1.transform.position.y);
+		lastTileMoved2 = new Vector2 (tile2.transform.position.x, tile2.transform.position.y);
 
 
 		//swap tiles on screen

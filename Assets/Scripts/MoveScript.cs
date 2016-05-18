@@ -5,11 +5,12 @@ using System.Threading;
 public class MoveScript : MonoBehaviour {
 
 	private GridManager gm;
-	private string colour;
+	private string name;
 	public Vector2 position;
 	private float currentAlpha;
 	float decrease = 0.1f;
 	public bool isBooster = false;
+	public bool isSpecialBooster = false;
 	public int tileIndex;
 
 
@@ -31,18 +32,18 @@ public class MoveScript : MonoBehaviour {
 		//gameObject.transform.position = destination;
 	}
 
-	public void changeColor(){
+	public void changeColor(Color c){
 
-		GetComponent<SpriteRenderer> ().color = Color.blue;
+		GetComponent<SpriteRenderer> ().color = c;
 	
 	}
 
-	public void setColour(string colour){
-		this.colour = colour;
+	public void setName(string colour){
+		this.name = colour;
 	}
 
-	public string getColour(){
-		return colour;
+	public string getName(){
+		return name;
 	}
 
 	public void setGridPosition(Vector2 position){
@@ -62,7 +63,7 @@ public class MoveScript : MonoBehaviour {
 
 		int missingTileCount = 0;
 
-		for (int y = (int)transform.position.y; y>=0; y--) {
+		for (int y = Mathf.RoundToInt(transform.position.y); y>=0; y--) {
 
 			RaycastHit2D hit = Physics2D.Raycast (new Vector2(transform.position.x, y), Vector2.zero, 0f);
 			if(!hit){
@@ -71,15 +72,12 @@ public class MoveScript : MonoBehaviour {
 		}
 
 		if (missingTileCount > 0) {
-			iTween.MoveTo (gameObject, iTween.Hash( "y", transform.position.y - missingTileCount, "x", transform.position.x, "time", gm.dropTime));
+			iTween.MoveTo (gameObject, iTween.Hash( "y", Mathf.RoundToInt(transform.position.y) - missingTileCount, "x", transform.position.x, "time", gm.dropTime));
 		}
 
-		if (isBooster) {
-			Debug.Log ("There were " + missingTileCount + " tiles missing underneath x:" + transform.position.x + " y: " + transform.position.y);
 
-		}
 
-		setGridPosition(new Vector2((int)transform.position.x,(int)transform.position.y - missingTileCount));
+		setGridPosition(new Vector2(Mathf.RoundToInt(transform.position.x),Mathf.RoundToInt(transform.position.y) - missingTileCount));
 	}
 
 	public void Flash(){

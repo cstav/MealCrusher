@@ -1,4 +1,9 @@
-﻿using UnityEngine;
+﻿// ICON ATTRIBUTIONS
+//Water bottle icon made by Madebyoliver from flaticon.com
+/* Place the attribution on the credits/description page of the application*/
+
+
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -75,7 +80,7 @@ public class GridManager : MonoBehaviour
 				Grid [x, y] = tile;
 
 				//Assign the tile its colour
-				Grid [x, y].GetComponent<MoveScript> ().setColour (tileColours [randomTile]);
+				Grid [x, y].GetComponent<MoveScript> ().setName (tileColours [randomTile]);
 				//give it its position in the grid
 				Grid [x, y].GetComponent<MoveScript> ().setGridPosition (new Vector2 (x, y));
 
@@ -116,7 +121,7 @@ public class GridManager : MonoBehaviour
 							*/
 
 		//5 in a row
-		/*
+	/*
 		int[,] testGrid = { {4,5,6,4,2,3,0,3},
 							{3,4,6,1,2,5,5,3},
 							{2,1,1,0,1,1,5,2},
@@ -125,8 +130,8 @@ public class GridManager : MonoBehaviour
 							{3,2,4,2,3,5,5,0},
 							{4,6,2,3,5,4,6,0},
 							{2,0,5,5,0,5,2,4}}; 
-		*/					
 
+*/
 		//4 in a row
 		/*
 		int[,] testGrid = { { 4, 5, 6, 4, 2, 3, 0, 3 },
@@ -160,11 +165,12 @@ public class GridManager : MonoBehaviour
 			{ 2, 1, 1, 5, 1, 2, 5, 2 },
 			{ 4, 5, 5, 1, 5, 3, 0, 3 },
 			{ 5, 6, 3, 2, 2, 6, 5, 5 },
-			{ 3, 2, 4, 3, 3, 5, 5, 0 },
-			{ 4, 6, 6, 3, 6, 6, 2, 0 },
+			{ 3, 5, 4, 3, 3, 5, 5, 0 },
+			{ 4, 5, 6, 3, 6, 6, 2, 0 },
 			{ 2, 0, 5, 5, 0, 5, 2, 4 }
 		}; 
-											
+
+
 
 		/*
 		int[,] testGrid = { {1,1,1,1,1,1,1,1},
@@ -191,7 +197,7 @@ public class GridManager : MonoBehaviour
 				Grid [x, y] = tile;
 
 				//Assign the tile its colour
-				Grid [x, y].GetComponent<MoveScript> ().setColour (tileColours [randomTile]);
+				Grid [x, y].GetComponent<MoveScript> ().setName (tileColours [randomTile]);
 				//give it its position in the grid
 				Grid [x, y].GetComponent<MoveScript> ().setGridPosition (new Vector2 (x, y));
 
@@ -207,7 +213,10 @@ public class GridManager : MonoBehaviour
 
 	public void CheckPossibleMatches ()
 	{
-		ReplaceGrid ();
+		//ReplaceGrid ();
+		//StartCoroutine(DestroyColumn(3));
+		if(playerinput.currentState == GameState.None)
+		StartCoroutine(DestroyRow(3));
 
 	}
 
@@ -242,18 +251,29 @@ public class GridManager : MonoBehaviour
 		for (int y = 0; y < GridHeight; y++) {
 			for (int x = 0; x < GridWidth; x++) {
 
-				if (currentColour != Grid [x, y].GetComponent<MoveScript> ().getColour ()) {
+				if (currentColour != Grid [x, y].GetComponent<MoveScript> ().getName ()) {
 
 					if (matchPositions.Count >= 3) {
 
 						matchSets [index] = new List<Vector2> ();
-						foreach (Vector2 match in matchPositions) {
-							matchSets [index].Add (match);
+						for(int i = 0; i < matchPositions.Count; i++) {
+
+							if (Grid [(int)matchPositions [i].x, (int)matchPositions [i].y].GetComponent<MoveScript> ().isBooster) {
+								//add column to matchpositions
+								for(int row = 0; row < GridHeight; row++){
+									matchPositions.Add (new Vector2(row, (int)matchPositions[i].y));
+								}
+								//add row to matchpositions
+								for(int col = 0; col < GridWidth; col++){
+									matchPositions.Add(new Vector2((int)matchPositions [i].x, col));
+								}
+							}
+							matchSets [index].Add (matchPositions[i]);
 						}
 						index++; //change the index
 					}
 
-					currentColour = Grid [x, y].GetComponent<MoveScript> ().getColour ();
+					currentColour = Grid [x, y].GetComponent<MoveScript> ().getName ();
 					matchPositions.Clear ();
 					matchPositions.Add (new Vector2 (x, y));
 				} else {
@@ -287,18 +307,29 @@ public class GridManager : MonoBehaviour
 		for (int x = 0; x < GridWidth; x++) {
 			for (int y = 0; y < GridHeight; y++) {
 				
-				if (currentColour != Grid [x, y].GetComponent<MoveScript> ().getColour ()) {
+				if (currentColour != Grid [x, y].GetComponent<MoveScript> ().getName ()) {
 					
 					if (matchPositions.Count >= 3) {
 
 						matchSets [index] = new List<Vector2> ();
-						foreach (Vector2 match in matchPositions) {
-							matchSets [index].Add (match);
+						for(int i = 0; i < matchPositions.Count; i++) {
+
+							if (Grid [(int)matchPositions [i].x, (int)matchPositions [i].y].GetComponent<MoveScript> ().isBooster) {
+								//add column to matchpositions
+								for(int row = 0; row < GridHeight; row++){
+									matchPositions.Add (new Vector2(row, matchPositions[i].y));
+								}
+								//add row to matchpositions
+								for(int col = 0; col < GridWidth; col++){
+									matchPositions.Add (new Vector2(matchPositions [i].x, col));
+								}
+							}
+							matchSets [index].Add (matchPositions[i]);
 						}
 						index++; //change the index
 					}
 					
-					currentColour = Grid [x, y].GetComponent<MoveScript> ().getColour ();
+					currentColour = Grid [x, y].GetComponent<MoveScript> ().getName ();
 					matchPositions.Clear ();
 					matchPositions.Add (new Vector2 (x, y));
 				} else {
@@ -374,6 +405,7 @@ public class GridManager : MonoBehaviour
 						boosterAdded = true;
 					} else if(tPos == matchSets[i].ElementAt(3) && boosterAdded == false){
 						CreateNormalBooster (tPos);
+						boosterAdded = true; //should be redundant
 					
 					}
 					else {
@@ -381,7 +413,18 @@ public class GridManager : MonoBehaviour
 					}
 					break;
 				case 5:
-					scorehandler.AddPoints (200);
+					if (tPos == lastTileMoved1 || tPos == lastTileMoved2) {
+						CreateSpecialBooster (tPos);
+						boosterAdded = true;
+					} else if(tPos == matchSets[i].ElementAt(4) && boosterAdded == false){
+						CreateSpecialBooster (tPos);
+						boosterAdded = true; //should be redundant
+					}
+					else {
+						DestroyTile (tPos);	
+					}
+
+
 					break;
 				default: 
 					DestroyTile (tPos);	
@@ -391,6 +434,9 @@ public class GridManager : MonoBehaviour
 
 			//Award points for match
 			switch (matchSets [i].Count) {
+			case 1:
+				scorehandler.AddPoints (20);
+				break;
 			case 3:
 				scorehandler.AddPoints (100);
 				break;
@@ -399,6 +445,10 @@ public class GridManager : MonoBehaviour
 				break;
 			case 5:
 				scorehandler.AddPoints (500);
+				break;
+			case 8:
+				//for a deleted row
+				scorehandler.AddPoints (1000);
 				break;
 			default: 
 				break;
@@ -410,33 +460,101 @@ public class GridManager : MonoBehaviour
 		lastTileMoved2 = new Vector2 (-1, -1);
 	}
 
+	public IEnumerator DestroyTilesWithName(string name){
+
+		List<Vector2>[] matchSets = new List<Vector2>[100];
+		index = 0;
+
+		for (int x = 0; x < GridWidth; x++) {
+			for (int y = 0; y < GridHeight; y++) {
+
+				if (Grid[x,y] != null && Grid [x, y].GetComponent<MoveScript> ().getName() == name) {
+					matchSets [index] = new List<Vector2> ();
+					matchSets [index].Add (new Vector2 (x,y));
+					index++;
+				
+				}
+			}
+		}
+
+		Debug.Log ("Number of same items: " + index);
+		DestroyTiles (matchSets);
+		ReplaceTiles ();
+		yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
+		StartCoroutine (continousCheck());
+	}
 		
 	public void DestroyTile(Vector2 tPos){
 
-		Destroy (Grid [(int)tPos.x, (int)tPos.y]);
-		Grid [(int)tPos.x, (int)tPos.y] = null;
+		Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
+		Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)] = null;
+	}
+
+	public IEnumerator DestroyColumn(int col){
+
+		for (int row = 0; row < GridWidth; row++) {
+
+			if (Grid [col, row] != null) {
+				Destroy (Grid [col, row]);
+				Grid [col, row] = null;
+			}
+
+		}
+			
+		ReplaceTiles ();
+
+		yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
+
+		StartCoroutine (continousCheck());
+	}
+	public IEnumerator DestroyRow(int row){
+
+		for (int col = 0; col < GridWidth; col++) {
+			if (Grid [col, row] != null) {
+				Destroy (Grid [col, row]);
+				Grid [col, row] = null;
+			}
+
+		}
+
+		ReplaceTiles ();
+		yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
+		StartCoroutine (continousCheck());
 	}
 
 
 	public void CreateNormalBooster (Vector2 tPos)
 	{
 
-		int tileType = (Grid [(int)tPos.x, (int)tPos.y]).GetComponent<MoveScript> ().tileIndex;
-		Destroy (Grid [(int)tPos.x, (int)tPos.y]);
-		GameObject tile = Instantiate (TilePrefabs [tileType], new Vector2 ((int)tPos.x, (int)tPos.y), Quaternion.identity) as GameObject;
-		tile.GetComponent<MoveScript> ().setColour (tileColours [tileType]);
+		int tileType = (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]).GetComponent<MoveScript> ().tileIndex;
+		Destroy (Grid [Mathf.RoundToInt(tPos.x),Mathf.RoundToInt(tPos.y)]);
+		GameObject tile = Instantiate (boosterPrefabs [tileType], new Vector2 (Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)), Quaternion.identity) as GameObject;
+		tile.GetComponent<MoveScript> ().setName (tileColours [tileType]);
 		tile.GetComponent<MoveScript> ().isBooster = true;
-		tile.GetComponent<MoveScript> ().changeColor ();
+		//tile.GetComponent<MoveScript> ().changeColor (Color.blue);
 		tile.GetComponent<MoveScript> ().tileIndex = tileType;
-		Grid [(int)tPos.x, (int)tPos.y] = tile;
+		Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)] = tile;
+
+
+	}
+
+	public void CreateSpecialBooster (Vector2 tPos)
+	{
+
+	
+		Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
+		GameObject tile = Instantiate (boosterPrefabs[7], new Vector2 (Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)), Quaternion.identity) as GameObject;
+		tile.GetComponent<MoveScript> ().setName ("water");
+		tile.GetComponent<MoveScript> ().isSpecialBooster= true;
+		Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)] = tile;
 
 
 	}
 
 	public void SwapTiles (GameObject tile1, GameObject tile2)
 	{
-		lastTileMoved1 = new Vector2 (tile1.transform.position.x, tile1.transform.position.y);
-		lastTileMoved2 = new Vector2 (tile2.transform.position.x, tile2.transform.position.y);
+		lastTileMoved1 = new Vector2 (Mathf.RoundToInt(tile1.transform.position.x),Mathf.RoundToInt( tile1.transform.position.y));
+		lastTileMoved2 = new Vector2 (Mathf.RoundToInt(tile2.transform.position.x), Mathf.RoundToInt(tile2.transform.position.y));
 
 
 		//swap tiles on screen
@@ -467,7 +585,7 @@ public class GridManager : MonoBehaviour
 			for (int i = 0; i < missingTileCount; i++) {
 				int randomTileID = Random.Range (0, TilePrefabs.Length);
 				GameObject tile = Instantiate (TilePrefabs [randomTileID], new Vector2 (x, GridHeight + i), Quaternion.identity) as GameObject;
-				tile.GetComponent<MoveScript> ().setColour (tileColours [randomTileID]);
+				tile.GetComponent<MoveScript> ().setName (tileColours [randomTileID]);
 				tile.GetComponent<MoveScript> ().tileIndex = randomTileID;
 				newTiles.Add (tile);
 			}
@@ -629,7 +747,7 @@ public class GridManager : MonoBehaviour
 			
 			gridlayout += ("Row " + y + ": ");
 			for (int x = 0; x < GridWidth; x++) {
-				gridlayout += (thisGrid [x, y].GetComponent<MoveScript> ().getColour () + ", ");
+				gridlayout += (thisGrid [x, y].GetComponent<MoveScript> ().getName () + ", ");
 			}
 			
 			gridlayout += ("\n");

@@ -24,7 +24,10 @@ public class GridManager : MonoBehaviour
 	public float swapTime = 0.25f;
 	public float dropTime = 0.5f;
 	public int index;
-	//number of match sets at each check
+	GameObject[,] fatGrid;
+	public GameObject fattyBlock;
+	int fatLeft = 0;
+	public GameObject[] feedback;
 
 	//two tiles that were last swapped
 	Vector2 lastTileMoved1;
@@ -36,7 +39,7 @@ public class GridManager : MonoBehaviour
 
 	void Awake ()
 	{
-
+		CreateFatBlocks ();
 		//set last tiles moved to a position not included in the grid
 		lastTileMoved1 = new Vector2 (-1, -1);
 		lastTileMoved2 = new Vector2 (-1, -1);
@@ -64,6 +67,36 @@ public class GridManager : MonoBehaviour
 
 	}
 
+	void CreateFatBlocks(){
+		fatGrid = new GameObject[GridWidth, GridHeight];
+
+		int[,] fatPositions = {
+
+				{0,0,0,0,0,0,0,0},
+				{0,0,0,0,0,0,0,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,1,1,1,1,0,0},
+				{0,0,0,0,0,0,0,0},
+				{0,0,0,0,0,0,0,0}};
+
+
+
+		for (int x = 0; x < GridHeight; x++) {
+			for (int y = 0; y < GridWidth; y++) {
+				if (fatPositions [x, y] == 1) {
+					GameObject fatblock = Instantiate (fattyBlock, new Vector2 (x, y), Quaternion.identity) as GameObject;
+					fatGrid [x, y] = fatblock;
+					fatLeft++;
+				}
+
+			}
+		}
+
+
+	}
+
 	IEnumerator CreateGrid ()
 	{
 		playerinput.currentState = GameState.Animating;
@@ -75,27 +108,24 @@ public class GridManager : MonoBehaviour
 
 				GameObject tile = Instantiate (TilePrefabs [randomTile], new Vector2 (x, y), Quaternion.identity) as GameObject;
 				tile.GetComponent<MoveScript> ().tileIndex = randomTile;
-				//float vol = Random.Range(0.2f,0.5f);
-				//source.PlayOneShot (pop,vol);
 				Grid [x, y] = tile;
 
-				//Assign the tile its colour
+				//Assign the tile a name
 				Grid [x, y].GetComponent<MoveScript> ().setName (tileColours [randomTile]);
-				//give it its position in the grid
-				Grid [x, y].GetComponent<MoveScript> ().setGridPosition (new Vector2 (x, y));
-
 
 				yield return new WaitForSeconds (.02f);
 			}
 		}
-
-
+			
 		StartCoroutine (continousCheck ());
 
 	}
 
 	IEnumerator CreateGridTest ()
 	{
+
+
+
 		//L shape
 		/*
 		int[,] testGrid = { {4,5,6,1,2,3,0,3},
@@ -121,17 +151,17 @@ public class GridManager : MonoBehaviour
 							*/
 
 		//5 in a row
-	/*
-		int[,] testGrid = { {4,5,6,4,2,3,0,3},
+
+		int[,] testGrid5 = {{4,5,6,4,2,3,0,3},
 							{3,4,6,1,2,5,5,3},
 							{2,1,1,0,1,1,5,2},
 							{4,5,6,2,2,3,0,3},
 							{5,6,5,2,2,6,5,5},
-							{3,2,4,2,3,5,5,0},
+							{3,2,4,0,3,5,5,0},
 							{4,6,2,3,5,4,6,0},
 							{2,0,5,5,0,5,2,4}}; 
 
-*/
+
 		//4 in a row
 		/*
 		int[,] testGrid = { { 4, 5, 6, 4, 2, 3, 0, 3 },
@@ -161,14 +191,14 @@ public class GridManager : MonoBehaviour
 		//2 4's at once
 
 		int[,] testGrid = { { 4, 5, 6, 4, 2, 3, 0, 3 },
-			{ 3, 4, 6, 2, 2, 5, 5, 3 },
-			{ 2, 1, 1, 5, 1, 2, 5, 2 },
-			{ 4, 5, 5, 1, 5, 3, 0, 3 },
-			{ 5, 6, 3, 2, 2, 6, 5, 5 },
-			{ 3, 5, 4, 3, 3, 5, 5, 0 },
-			{ 4, 5, 6, 3, 6, 6, 2, 0 },
-			{ 2, 0, 5, 5, 0, 5, 2, 4 }
-		}; 
+							{ 3, 4, 6, 2, 2, 5, 5, 3 },
+							{ 2, 1, 1, 5, 1, 2, 5, 2 },
+							{ 4, 5, 5, 1, 5, 3, 0, 3 },
+							{ 5, 6, 3, 2, 2, 6, 5, 5 },
+							{ 3, 5, 4, 3, 3, 5, 5, 0 },
+							{ 4, 5, 6, 3, 6, 6, 2, 0 },
+							{ 2, 0, 5, 5, 0, 5, 2, 4 }
+						}; 
 
 
 
@@ -188,18 +218,22 @@ public class GridManager : MonoBehaviour
 
 		for (int y = GridHeight - 1; y >= 0; y--) {
 			for (int x = 0; x < GridWidth; x++) {
-				int randomTile = testGrid [x, y];
+
+				//change this back later----------------------------------------------
+				int randomTile;
+				if (Application.loadedLevel == 1) {
+					randomTile = testGrid5 [x, y];
+				} else {
+					randomTile = testGrid [x, y];
+				}
+
 
 				GameObject tile = Instantiate (TilePrefabs [randomTile], new Vector2 (x, y), Quaternion.identity) as GameObject;
 				tile.GetComponent<MoveScript> ().tileIndex = randomTile;
-				//float vol = Random.Range(0.2f,0.5f);
-				//source.PlayOneShot (pop,vol);
 				Grid [x, y] = tile;
 
-				//Assign the tile its colour
+				//Assign the tile a name
 				Grid [x, y].GetComponent<MoveScript> ().setName (tileColours [randomTile]);
-				//give it its position in the grid
-				Grid [x, y].GetComponent<MoveScript> ().setGridPosition (new Vector2 (x, y));
 
 
 				yield return new WaitForSeconds (.02f);
@@ -211,12 +245,11 @@ public class GridManager : MonoBehaviour
 
 	}
 
-	public void CheckPossibleMatches ()
+	public void SpaceBarFunction ()
 	{
-		//ReplaceGrid ();
-		//StartCoroutine(DestroyColumn(3));
-		if(playerinput.currentState == GameState.None)
-		StartCoroutine(DestroyRow(3));
+		ReplaceGrid ();
+
+
 
 	}
 
@@ -228,13 +261,50 @@ public class GridManager : MonoBehaviour
 				Destroy (Grid [x, y]);
 			}
 		}
-		StartCoroutine (CreateGrid ());
+		//change back later-----------------------------------------------------------------------------------------
+		//StartCoroutine (CreateGrid ());
+		StartCoroutine (CreateGridTest ());
 	}
 
-	
+	bool checkForBooster(Vector2 pos){
+
+		if (Grid [(int)pos.x, (int)pos.y].GetComponent<MoveScript> ().isBooster) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public List<Vector2> getRowCol(Vector2 pos){
+
+		List<Vector2> rowCol = new List<Vector2> ();
 
 
+		int col = (int)pos.x;
 
+		//add column
+		for (int r = 0; r < GridHeight; r++) {
+			rowCol.Add (new Vector2(col, r));
+		}
+
+		int row = (int)pos.y;
+
+		//add row
+		for(int c = 0; c < GridWidth; c++){
+			if (!rowCol.Contains (new Vector2(c, row))) {
+				rowCol.Add (new Vector2(c, row));
+			}
+		}
+		
+		//print for debugging
+		string tiles = "Debugging";
+		foreach(Vector2 tile in rowCol){
+			tiles += tile.x + ":" + tile.y + ", ";
+		}
+		Debug.Log (tiles);
+
+		return rowCol;
+	}
 
 	public List<Vector2>[] getMatches ()
 	{
@@ -256,19 +326,25 @@ public class GridManager : MonoBehaviour
 					if (matchPositions.Count >= 3) {
 
 						matchSets [index] = new List<Vector2> ();
-						for(int i = 0; i < matchPositions.Count; i++) {
+						foreach (Vector2 match in matchPositions) {
 
-							if (Grid [(int)matchPositions [i].x, (int)matchPositions [i].y].GetComponent<MoveScript> ().isBooster) {
-								//add column to matchpositions
-								for(int row = 0; row < GridHeight; row++){
-									matchPositions.Add (new Vector2(row, (int)matchPositions[i].y));
-								}
-								//add row to matchpositions
-								for(int col = 0; col < GridWidth; col++){
-									matchPositions.Add(new Vector2((int)matchPositions [i].x, col));
-								}
+							if (!matchSets [index].Contains (match)) {
+								matchSets [index].Add (match);
 							}
-							matchSets [index].Add (matchPositions[i]);
+							
+							if (checkForBooster (match)) {
+								Debug.Log("Yeah one of the tiles in the match was a booster: " + match.x +":"+ match.y);
+					
+								//get col and row of booster
+								List<Vector2> rowCol = getRowCol(match);
+								foreach (Vector2 item in rowCol) {
+									if (!matchSets [index].Contains (item)) {
+										matchSets [index].Add (item);
+									}
+								}
+
+							}
+
 						}
 						index++; //change the index
 					}
@@ -312,19 +388,25 @@ public class GridManager : MonoBehaviour
 					if (matchPositions.Count >= 3) {
 
 						matchSets [index] = new List<Vector2> ();
-						for(int i = 0; i < matchPositions.Count; i++) {
+						foreach (Vector2 match in matchPositions) {
 
-							if (Grid [(int)matchPositions [i].x, (int)matchPositions [i].y].GetComponent<MoveScript> ().isBooster) {
-								//add column to matchpositions
-								for(int row = 0; row < GridHeight; row++){
-									matchPositions.Add (new Vector2(row, matchPositions[i].y));
-								}
-								//add row to matchpositions
-								for(int col = 0; col < GridWidth; col++){
-									matchPositions.Add (new Vector2(matchPositions [i].x, col));
-								}
+							if (!matchSets [index].Contains (match)) {
+								matchSets [index].Add (match);
 							}
-							matchSets [index].Add (matchPositions[i]);
+
+							if (checkForBooster (match)) {
+								Debug.Log("Yeah one of the tiles in the match was a booster: " + match.x +":"+ match.y);
+
+								//get col and row of booster
+								List<Vector2> rowCol = getRowCol(match);
+								foreach (Vector2 item in rowCol) {
+									if (!matchSets [index].Contains (item)) {
+										matchSets [index].Add (item);
+									}
+								}
+
+							}
+
 						}
 						index++; //change the index
 					}
@@ -345,13 +427,28 @@ public class GridManager : MonoBehaviour
 		//after scanning the whole grid we need to check if 3 or more tiles matched again...
 
 		if (matchPositions.Count >= 3) {
-			matchSets [index] = new List<Vector2> (); //create new list
 
-			//add all matches to new list
+			matchSets [index] = new List<Vector2> ();
 			foreach (Vector2 match in matchPositions) {
-				matchSets [index].Add (match);
-			}
 
+				if (!matchSets [index].Contains (match)) {
+					matchSets [index].Add (match);
+				}
+
+				if (checkForBooster (match)) {
+					Debug.Log("Yeah one of the tiles in the match was a booster: " + match.x +":"+ match.y);
+
+					//get col and row of booster
+					List<Vector2> rowCol = getRowCol(match);
+					foreach (Vector2 item in rowCol) {
+						if (!matchSets [index].Contains (item)) {
+							matchSets [index].Add (item);
+						}
+					}
+
+				}
+
+			}
 			index++; //change the index
 		}
 
@@ -377,7 +474,7 @@ public class GridManager : MonoBehaviour
 	public void DestroyTiles (List<Vector2>[] matchSets)
 	{
 
-		printMatchSets (matchSets);
+		//printMatchSets (matchSets);
 
 		if (matchSets [0] != null) {
 			source.PlayOneShot (zap);
@@ -446,9 +543,9 @@ public class GridManager : MonoBehaviour
 			case 5:
 				scorehandler.AddPoints (500);
 				break;
-			case 8:
-				//for a deleted row
-				scorehandler.AddPoints (1000);
+			case 15:
+				//for a deleted row and col
+				scorehandler.AddPoints (10000);
 				break;
 			default: 
 				break;
@@ -477,8 +574,9 @@ public class GridManager : MonoBehaviour
 			}
 		}
 
-		Debug.Log ("Number of same items: " + index);
+		//Debug.Log ("Number of same items: " + index);
 		DestroyTiles (matchSets);
+		yield return new WaitForSeconds (0.15f);
 		ReplaceTiles ();
 		yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
 		StartCoroutine (continousCheck());
@@ -488,50 +586,29 @@ public class GridManager : MonoBehaviour
 
 		Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
 		Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)] = null;
-	}
-
-	public IEnumerator DestroyColumn(int col){
-
-		for (int row = 0; row < GridWidth; row++) {
-
-			if (Grid [col, row] != null) {
-				Destroy (Grid [col, row]);
-				Grid [col, row] = null;
-			}
+		if (fatGrid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)] != null) {
+			Destroy (fatGrid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
+			fatGrid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)] = null;
 
 		}
-			
-		ReplaceTiles ();
-
-		yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
-
-		StartCoroutine (continousCheck());
 	}
-	public IEnumerator DestroyRow(int row){
 
-		for (int col = 0; col < GridWidth; col++) {
-			if (Grid [col, row] != null) {
-				Destroy (Grid [col, row]);
-				Grid [col, row] = null;
-			}
-
-		}
-
-		ReplaceTiles ();
-		yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
-		StartCoroutine (continousCheck());
+	public void DisplayFeedback(int type){
+		GameObject f = Instantiate (feedback[type], new Vector2 (3.5f, 3.5f), Quaternion.identity) as GameObject;
 	}
+		
 
 
 	public void CreateNormalBooster (Vector2 tPos)
 	{
-
+		DisplayFeedback (0);
 		int tileType = (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]).GetComponent<MoveScript> ().tileIndex;
-		Destroy (Grid [Mathf.RoundToInt(tPos.x),Mathf.RoundToInt(tPos.y)]);
+
+		DestroyTile (new Vector2(tPos.x,tPos.y));
+		//Destroy (Grid [Mathf.RoundToInt(tPos.x),Mathf.RoundToInt(tPos.y)]);
 		GameObject tile = Instantiate (boosterPrefabs [tileType], new Vector2 (Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)), Quaternion.identity) as GameObject;
 		tile.GetComponent<MoveScript> ().setName (tileColours [tileType]);
 		tile.GetComponent<MoveScript> ().isBooster = true;
-		//tile.GetComponent<MoveScript> ().changeColor (Color.blue);
 		tile.GetComponent<MoveScript> ().tileIndex = tileType;
 		Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)] = tile;
 
@@ -540,9 +617,9 @@ public class GridManager : MonoBehaviour
 
 	public void CreateSpecialBooster (Vector2 tPos)
 	{
-
-	
-		Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
+		DisplayFeedback (0);
+		DestroyTile (new Vector2(tPos.x,tPos.y));
+		//Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
 		GameObject tile = Instantiate (boosterPrefabs[7], new Vector2 (Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)), Quaternion.identity) as GameObject;
 		tile.GetComponent<MoveScript> ().setName ("water");
 		tile.GetComponent<MoveScript> ().isSpecialBooster= true;
@@ -626,7 +703,8 @@ public class GridManager : MonoBehaviour
 		do {
 			UpdateGridArray (); //update grid
 			matches = getMatches (); //Retrieve any new matches
-			DestroyTiles (matches);	//Destroy tiles from matches		
+			DestroyTiles (matches);	//Destroy tiles from matches
+			yield return new WaitForSeconds (0.15f);
 			ReplaceTiles ();			//Replace these tiles
 			yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
 		} while(matches [0] != null);
@@ -670,7 +748,7 @@ public class GridManager : MonoBehaviour
 
 				List<Vector2>[] matches = getMatches ();
 				if (matches [0] != null) {
-					Debug.Log ("Swap " + x + ":" + y + "with " + (x + 1) + ":" + y);
+					//Debug.Log ("Swap " + x + ":" + y + "with " + (x + 1) + ":" + y);
 					Debug.Log ("there are potential HORIZONTAL moves");
 					DisplayMoves (Grid [x, y], Grid [x + 1, y]);
 					return true;
@@ -701,7 +779,7 @@ public class GridManager : MonoBehaviour
 				Grid = TempGrid;
 				List<Vector2>[] matches = getMatches ();
 				if (matches [0] != null) {
-					Debug.Log ("Swap " + x + ":" + y + "with " + x + ":" + (y - 1));
+					//Debug.Log ("Swap " + x + ":" + y + "with " + x + ":" + (y - 1));
 					Debug.Log ("there are potential Vertical moves");
 					DisplayMoves (Grid [x, y], Grid [x, y - 1]);
 					return true;

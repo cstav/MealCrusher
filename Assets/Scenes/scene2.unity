@@ -1078,6 +1078,9 @@ MonoBehaviour:
   swapTime: 0.25
   dropTime: 0.8
   index: 0
+  fattyBlock: {fileID: 118286, guid: b3961cd696e434013acaa701c12b9b44, type: 2}
+  feedback:
+  - {fileID: 182122, guid: 9c8c20ff6847f4e7991d8adc17cdf46c, type: 2}
 --- !u!4 &1782749070
 Transform:
   m_ObjectHideFlags: 0

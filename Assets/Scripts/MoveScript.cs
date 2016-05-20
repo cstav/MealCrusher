@@ -6,7 +6,6 @@ public class MoveScript : MonoBehaviour {
 
 	private GridManager gm;
 	private string name;
-	public Vector2 position;
 	private float currentAlpha;
 	float decrease = 0.1f;
 	public bool isBooster = false;
@@ -45,19 +44,12 @@ public class MoveScript : MonoBehaviour {
 	public string getName(){
 		return name;
 	}
-
-	public void setGridPosition(Vector2 position){
-
-	}
-
-	public Vector2 getGridPosition(){
-		return position;
-	}
+		
 
 
 	//each tile checks how many spots are empty below and moves down that many spot
 	public void GravityCheck(){
-
+		
 		//when tiles are moved we want to stop them from flashing
 		StopFlashing ();
 
@@ -75,9 +67,6 @@ public class MoveScript : MonoBehaviour {
 			iTween.MoveTo (gameObject, iTween.Hash( "y", Mathf.RoundToInt(transform.position.y) - missingTileCount, "x", transform.position.x, "time", gm.dropTime));
 		}
 
-
-
-		setGridPosition(new Vector2(Mathf.RoundToInt(transform.position.x),Mathf.RoundToInt(transform.position.y) - missingTileCount));
 	}
 
 	public void Flash(){

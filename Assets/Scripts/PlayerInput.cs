@@ -44,7 +44,7 @@ public class PlayerInput : MonoBehaviour
 			}
 
 			if (Input.GetKeyDown ("space")) {
-				gm.CheckPossibleMatches ();
+				gm.SpaceBarFunction ();
 			}
 		}
 	
@@ -54,10 +54,10 @@ public class PlayerInput : MonoBehaviour
 	{
 		Vector2 rayPos = new Vector2 (Camera.main.ScreenToWorldPoint (Input.mousePosition).x, Camera.main.ScreenToWorldPoint (Input.mousePosition).y);
 		RaycastHit2D hit = Physics2D.Raycast (rayPos, Vector2.zero, 0f);
-		Debug.Log ("hit: " + hit);
+		//Debug.Log ("hit: " + hit);
 		if (hit) {	
 			
-			Debug.Log ("hit tile");
+			//Debug.Log ("hit tile");
 			activeTile = hit.collider.gameObject;
 		}
 	}
@@ -65,7 +65,7 @@ public class PlayerInput : MonoBehaviour
 	IEnumerator AttemptMove ()
 	{
 
-		Debug.Log ("attempted move");
+		//Debug.Log ("attempted move");
 		Vector2 tilePos = new Vector2 (Camera.main.ScreenToWorldPoint (Input.mousePosition).x, Camera.main.ScreenToWorldPoint (Input.mousePosition).y);
 		RaycastHit2D hit = Physics2D.Raycast (tilePos, Vector2.zero, 0f);
 
@@ -149,7 +149,7 @@ public class PlayerInput : MonoBehaviour
 		float xDiff = Mathf.RoundToInt (Mathf.Abs (activeTile.transform.position.x - objectToCheck.transform.position.x));
 		float yDiff = Mathf.RoundToInt (Mathf.Abs (activeTile.transform.position.y - objectToCheck.transform.position.y));
 
-		Debug.Log ("Diff: " + (xDiff + yDiff));
+		//Debug.Log ("Diff: " + (xDiff + yDiff));
 
 		if (xDiff + yDiff == 1) {
 			return true;

@@ -78,36 +78,38 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 
 */
 
-	bool CheckForAdjCigs (Vector2 tPos)
+	List<Vector2> GetAdjCigs (Vector2 tPos)
 	{
+		List<Vector2> adjacentCigs = new List<Vector2> ();
 		int x = Mathf.RoundToInt (tPos.x);
 		int y = Mathf.RoundToInt (tPos.y);
 
 		//check above
 		if (y < 7) {
 			if (Grid [x, y + 1].GetComponent<MoveScript> ().getName () == "ciggy") {
-				return true;
+				adjacentCigs.Add (new Vector2 (x, y + 1));
 			}
 		}
 		//check below
 		if (y > 0) {
 			if (Grid [x, y - 1].GetComponent<MoveScript> ().getName () == "ciggy") {
-				return true;
+				adjacentCigs.Add (new Vector2 (x, y - 1));
 			}
 		}
 		//check right
 		if (x < 7) {
 			if (Grid [x + 1, y].GetComponent<MoveScript> ().getName () == "ciggy") {
-				return true;
+				adjacentCigs.Add (new Vector2 (x + 1, y));
 			}
 		}
 		//check left
 		if (x > 0) {
 			if (Grid [x - 1, y].GetComponent<MoveScript> ().getName () == "ciggy") {
-				return true;
+				adjacentCigs.Add (new Vector2 (x - 1, y));
 			}
 		}
-		return false;
+
+		return adjacentCigs;
 	}
 
 	void Awake ()
@@ -395,16 +397,17 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		List<Vector2>[] matchSets = new List<Vector2>[100]; 
 		index = 0;
 
-		string currentColour = "none";
+		string currentName = "none";
 
 
 		//check horizontal matches
 		for (int y = 0; y < GridHeight; y++) {
 			for (int x = 0; x < GridWidth; x++) {
 
-				if (currentColour != Grid [x, y].GetComponent<MoveScript> ().getName ()) {
+				if (currentName != Grid [x, y].GetComponent<MoveScript> ().getName ()) {
 
-					if (matchPositions.Count >= 3) {
+					//makes sure cigarettes arent matchable
+					if (matchPositions.Count >= 3 && currentName != "ciggy") {
 
 						matchSets [index] = new List<Vector2> ();
 						foreach (Vector2 match in matchPositions) {
@@ -430,7 +433,7 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 						index++; //change the index
 					}
 
-					currentColour = Grid [x, y].GetComponent<MoveScript> ().getName ();
+					currentName = Grid [x, y].GetComponent<MoveScript> ().getName ();
 					matchPositions.Clear ();
 					matchPositions.Add (new Vector2 (x, y));
 				} else {
@@ -439,13 +442,14 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 
 			}
 			//at the end set colour back to none
-			currentColour = "none";
+			currentName = "none";
 
 		}
 
 		//after scanning the whole grid we need to check if 3 or more tiles matched again...
 
-		if (matchPositions.Count >= 3) {
+
+		if (matchPositions.Count >= 3 && currentName != "ciggy") {
 			matchSets [index] = new List<Vector2> (); //create new list
 
 			//add all matches to new list
@@ -459,14 +463,14 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 
 
 		//check vertical matches
-		currentColour = "none";
+		currentName = "none";
 		
 		for (int x = 0; x < GridWidth; x++) {
 			for (int y = 0; y < GridHeight; y++) {
 				
-				if (currentColour != Grid [x, y].GetComponent<MoveScript> ().getName ()) {
+				if (currentName != Grid [x, y].GetComponent<MoveScript> ().getName ()) {
 					
-					if (matchPositions.Count >= 3) {
+					if (matchPositions.Count >= 3 && currentName != "ciggy") {
 
 						matchSets [index] = new List<Vector2> ();
 						foreach (Vector2 match in matchPositions) {
@@ -492,7 +496,7 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 						index++; //change the index
 					}
 					
-					currentColour = Grid [x, y].GetComponent<MoveScript> ().getName ();
+					currentName = Grid [x, y].GetComponent<MoveScript> ().getName ();
 					matchPositions.Clear ();
 					matchPositions.Add (new Vector2 (x, y));
 				} else {
@@ -501,13 +505,13 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 				
 			}
 			//at the end set colour back to none
-			currentColour = "none";
+			currentName = "none";
 			
 		}
 			
 		//after scanning the whole grid we need to check if 3 or more tiles matched again...
 
-		if (matchPositions.Count >= 3) {
+		if (matchPositions.Count >= 3 && currentName != "ciggy") {
 
 			matchSets [index] = new List<Vector2> ();
 			foreach (Vector2 match in matchPositions) {
@@ -568,7 +572,7 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 	
 
 			int matchCount = matchSets [i].Count;
-			Vector2 boosterPos = new Vector2 ();
+			//Vector2 boosterPos = new Vector2 ();
 			bool boosterAdded = false;
 
 			//destroy all tiles in all sets
@@ -664,6 +668,7 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 
 	public void DestroyTile (Vector2 tPos)
 	{
+		
 
 		GameObject e = Instantiate (explosion, new Vector2 (tPos.x, tPos.y), Quaternion.identity) as GameObject;
 
@@ -711,8 +716,18 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		tile.GetComponent<MoveScript> ().setName ("water");
 		tile.GetComponent<MoveScript> ().isSpecialBooster = true;
 		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
-		//UpdateGridArray ();
 
+
+
+	}
+
+	public void CreateCigarette(Vector2 tPos){
+		
+		DestroyTile (new Vector2 (tPos.x, tPos.y));
+		//Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
+		GameObject tile = Instantiate (TilePrefabs [6], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
+		tile.GetComponent<MoveScript> ().setName ("ciggy");
+		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
 
 	}
 
@@ -786,6 +801,61 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		}
 	}
 
+	bool CigsDestroyed(List<Vector2>[] matches){
+		//change this name
+		bool dontSpawnCig = true;
+
+		//check if matches are near cigarettes
+
+			List<Vector2> adjacentCigs;
+			List<Vector2> cigsToDestroy = new List<Vector2> ();
+			for (int i = 0; i < index; i++) {
+				foreach (Vector2 tPos in matches[i]) {
+					adjacentCigs = GetAdjCigs (tPos);
+					foreach (Vector2 cigarette in adjacentCigs) {
+						cigsToDestroy.Add (cigarette);
+						//Debug.Log("cig @ " + cigarette.x + ":" + cigarette.y);
+					}
+				}
+			}
+
+
+			if (cigsToDestroy.Count == 0 && cigCount > 0) {
+				
+				dontSpawnCig = false;
+
+			} else {
+				Debug.Log ("Delete a cigarette");
+				foreach(Vector2 cigarette in cigsToDestroy){
+					DestroyTile(cigarette);
+				}
+			}
+		
+
+		return dontSpawnCig;
+	}
+
+	void SpawnCig(int row, int col){
+
+		//spawn a cig in the first available cel in the row
+		for(int y = 0; y < GridWidth; y++){
+			for (int x= 0; x < GridHeight; x++) {
+				if (Grid [x, y].GetComponent<MoveScript> ().getName () != "ciggy") {
+
+
+					CreateCigarette (new Vector2 (x, y));
+
+
+					goto Spawned;
+				}
+			}
+		}
+
+		Spawned: 
+		Debug.Log ("");
+
+	}
+
 	public IEnumerator continousCheck ()
 	{
 		bool firstTime = true;
@@ -799,33 +869,27 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		//replace the tiles
 		//update the grid
 
+
+
+
+
 		do {
 			if (!firstTime || automate)//to prevent a double wait period
 			yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
 			UpdateGridArray (); //update grid
 			matches = getMatches (); //Retrieve any new matches
-			if(matches [0] == null)break;
+			if (matches [0] == null)
+				break;
 
-			//check if matches are near cigarettes
-			if (cigOn) {
-				int surroundingCigs = 0;
-
-				for (int i = 0; i < index; i++) {
-					foreach (Vector2 tPos in matches[i]) {
-						if (CheckForAdjCigs (tPos)) {
-							surroundingCigs++;
-						}
-					}
-				}
-
-				if (surroundingCigs < 1 && cigCount > 0) {
-					Debug.Log ("Spawn a cigarette");
-				} else {
-					Debug.Log ("Delete a cigarette");
+			if(cigOn){
+				if(!CigsDestroyed(matches)){
+					//Debug.Log ("Spawn a cigarette");
+					SpawnCig(0,0);
 				}
 			}
 
-
+			Debug.Log("printing matchsets");
+			printMatchSets(matches);
 			DestroyTiles (matches);	//Destroy tiles from matches
 			yield return new WaitForSeconds (0.2f);
 			ReplaceTiles ();			//Replace these tiles

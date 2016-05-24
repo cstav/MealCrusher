@@ -1057,12 +1057,12 @@ MonoBehaviour:
     m_Bits: 0
   TilePrefabs:
   - {fileID: 132728, guid: 09e342aac3e2a4f4c8e33bd9c1bec692, type: 2}
-  - {fileID: 190508, guid: 572629b2841f34c499c9105c790507a0, type: 2}
+  - {fileID: 158420, guid: 9711e93f6b9464f6f83e650e5be87209, type: 2}
   - {fileID: 147112, guid: c62e7978a2f6047f8a269f8517df356d, type: 2}
   - {fileID: 119370, guid: 9061e563f4e3b4219b6cbcd934e77205, type: 2}
   - {fileID: 137888, guid: 98773a910654d490eb4c7cd1d1462486, type: 2}
   - {fileID: 153068, guid: 8083bbae880044cb79c33c55d670a030, type: 2}
-  - {fileID: 158420, guid: 9711e93f6b9464f6f83e650e5be87209, type: 2}
+  - {fileID: 190508, guid: 572629b2841f34c499c9105c790507a0, type: 2}
   boosterPrefabs:
   - {fileID: 182644, guid: 356f1409211294312834b24dbf6e0da2, type: 2}
   - {fileID: 106922, guid: 9f0fc26068e564c7eb9d728d3c204a34, type: 2}
@@ -1081,6 +1081,7 @@ MonoBehaviour:
   fattyBlock: {fileID: 118286, guid: b3961cd696e434013acaa701c12b9b44, type: 2}
   feedback:
   - {fileID: 182122, guid: 9c8c20ff6847f4e7991d8adc17cdf46c, type: 2}
+  explosion: {fileID: 177612, guid: 9f947fa87a593410a91e69993a944bb2, type: 2}
 --- !u!4 &1782749070
 Transform:
   m_ObjectHideFlags: 0

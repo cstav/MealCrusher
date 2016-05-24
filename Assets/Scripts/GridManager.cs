@@ -21,13 +21,22 @@ public class GridManager : MonoBehaviour
 	public AudioSource source;
 	public AudioClip zap;
 	public AudioClip pop;
-	public float swapTime = 0.25f;
-	public float dropTime = 0.5f;
+	public float swapTime = 0.2f;
+	public float dropTime = 0.35f;
 	public int index;
-	GameObject[,] fatGrid;
+	public GameObject[,] fatGrid;
 	public GameObject fattyBlock;
 	int fatLeft = 0;
+	//to toggle fat blocks on and off
+	bool fatOn = true;
+	//to toggle ciggarettes on and off
+	bool cigOn = true;
+	//for the game to play by itself
+	bool automate = false;
 	public GameObject[] feedback;
+	public GameObject explosion;
+	int cigCount = 2;
+	//number of cigarettes on the grid at a given time
 
 	//two tiles that were last swapped
 	Vector2 lastTileMoved1;
@@ -36,10 +45,77 @@ public class GridManager : MonoBehaviour
 	PlayerInput playerinput;
 	ScoreHandler scorehandler;
 
+	/*
+Methods that i need for the ciggarettes
+
+int cigsCount;
+int surroundingCigs;
+bool CigsNearby();
+
+
+Maybe when you retreive the matches, we should loop through those matches and do a CheckForAdjCigs() on all of them
+The int surroundingCigs can be incremented everytime checkForAdjCigs returns true.
+
+if we have reached the end of the list and surroundcigs = 0 but cigCount > 0, then we need to respawn a new cigarette
+We spawn a cigarette by deleting the existing tile and replacing it with a cigarette
+
+When we respawn a new cigarette, we want it to be situated adjacent to an existing cigarette, and increment the cigs count
+In order to keep these adjacent maybe we should:
+		next available horizontal position
+		next available vertical position
+		
+
+if we have reached the end of the list and surroundingcigs > 0, me must destroy the adjacent cigarretes and decrement the cigsCount
+accordingly
+
+After destroying these tiles, they will need to be replaced
+
+**NOTE**
+Cigarettes should never move position so they should never respond to gravity
+This also means that, when other tiles are checking missing tiles below, cigarettes should act as a missing tile
+
+
+
+*/
+
+	bool CheckForAdjCigs (Vector2 tPos)
+	{
+		int x = Mathf.RoundToInt (tPos.x);
+		int y = Mathf.RoundToInt (tPos.y);
+
+		//check above
+		if (y < 7) {
+			if (Grid [x, y + 1].GetComponent<MoveScript> ().getName () == "ciggy") {
+				return true;
+			}
+		}
+		//check below
+		if (y > 0) {
+			if (Grid [x, y - 1].GetComponent<MoveScript> ().getName () == "ciggy") {
+				return true;
+			}
+		}
+		//check right
+		if (x < 7) {
+			if (Grid [x + 1, y].GetComponent<MoveScript> ().getName () == "ciggy") {
+				return true;
+			}
+		}
+		//check left
+		if (x > 0) {
+			if (Grid [x - 1, y].GetComponent<MoveScript> ().getName () == "ciggy") {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	void Awake ()
 	{
-		CreateFatBlocks ();
+		if (fatOn == true) {
+			CreateFatBlocks ();
+		}
+
 		//set last tiles moved to a position not included in the grid
 		lastTileMoved1 = new Vector2 (-1, -1);
 		lastTileMoved2 = new Vector2 (-1, -1);
@@ -50,12 +126,12 @@ public class GridManager : MonoBehaviour
 		source = gameObject.GetComponent<AudioSource> ();
 		tileColours = new string[7];
 		tileColours [0] = "beer";
-		tileColours [1] = "ciggy";
+		tileColours [1] = "strawberry";
 		tileColours [2] = "cutlet";
 		tileColours [3] = "hamburger";
 		tileColours [4] = "milk";
 		tileColours [5] = "pepper";
-		tileColours [6] = "strawberry";
+		tileColours [6] = "ciggy";
 
 		if (Application.loadedLevel == 2) {
 			StartCoroutine (CreateGridTest ());
@@ -67,19 +143,21 @@ public class GridManager : MonoBehaviour
 
 	}
 
-	void CreateFatBlocks(){
+	void CreateFatBlocks ()
+	{
 		fatGrid = new GameObject[GridWidth, GridHeight];
 
 		int[,] fatPositions = {
 
-				{0,0,0,0,0,0,0,0},
-				{0,0,0,0,0,0,0,0},
-				{0,0,1,1,1,1,0,0},
-				{0,0,1,1,1,1,0,0},
-				{0,0,1,1,1,1,0,0},
-				{0,0,1,1,1,1,0,0},
-				{0,0,0,0,0,0,0,0},
-				{0,0,0,0,0,0,0,0}};
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 1, 1, 1, 1, 0, 0 },
+			{ 0, 0, 1, 1, 1, 1, 0, 0 },
+			{ 0, 0, 1, 1, 1, 1, 0, 0 },
+			{ 0, 0, 1, 1, 1, 1, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 }
+		};
 
 
 
@@ -104,7 +182,7 @@ public class GridManager : MonoBehaviour
 		
 		for (int y = GridHeight - 1; y >= 0; y--) {
 			for (int x = 0; x < GridWidth; x++) {
-				int randomTile = Random.Range (0, TilePrefabs.Length);
+				int randomTile = Random.Range (0, TilePrefabs.Length - 1);
 
 				GameObject tile = Instantiate (TilePrefabs [randomTile], new Vector2 (x, y), Quaternion.identity) as GameObject;
 				tile.GetComponent<MoveScript> ().tileIndex = randomTile;
@@ -152,14 +230,15 @@ public class GridManager : MonoBehaviour
 
 		//5 in a row
 
-		int[,] testGrid5 = {{4,5,6,4,2,3,0,3},
-							{3,4,6,1,2,5,5,3},
-							{2,1,1,0,1,1,5,2},
-							{4,5,6,2,2,3,0,3},
-							{5,6,5,2,2,6,5,5},
-							{3,2,4,0,3,5,5,0},
-							{4,6,2,3,5,4,6,0},
-							{2,0,5,5,0,5,2,4}}; 
+		int[,] testGrid5 = {{ 4, 5, 6, 4, 2, 3, 0, 3 },
+			{ 3, 4, 6, 1, 2, 5, 5, 3 },
+			{ 2, 1, 1, 0, 1, 1, 5, 2 },
+			{ 4, 5, 6, 2, 2, 3, 0, 3 },
+			{ 5, 6, 5, 2, 2, 6, 5, 5 },
+			{ 3, 2, 4, 0, 3, 5, 5, 0 },
+			{ 4, 6, 2, 3, 5, 4, 6, 0 },
+			{ 2, 0, 5, 5, 0, 5, 2, 4 }
+		}; 
 
 
 		//4 in a row
@@ -191,14 +270,14 @@ public class GridManager : MonoBehaviour
 		//2 4's at once
 
 		int[,] testGrid = { { 4, 5, 6, 4, 2, 3, 0, 3 },
-							{ 3, 4, 6, 2, 2, 5, 5, 3 },
-							{ 2, 1, 1, 5, 1, 2, 5, 2 },
-							{ 4, 5, 5, 1, 5, 3, 0, 3 },
-							{ 5, 6, 3, 2, 2, 6, 5, 5 },
-							{ 3, 5, 4, 3, 3, 5, 5, 0 },
-							{ 4, 5, 6, 3, 6, 6, 2, 0 },
-							{ 2, 0, 5, 5, 0, 5, 2, 4 }
-						}; 
+			{ 3, 4, 6, 2, 2, 5, 5, 3 },
+			{ 2, 1, 1, 5, 1, 2, 5, 2 },
+			{ 4, 5, 5, 1, 5, 3, 0, 3 },
+			{ 5, 6, 3, 2, 2, 6, 5, 5 },
+			{ 3, 5, 4, 3, 3, 5, 5, 0 },
+			{ 4, 5, 6, 3, 6, 6, 2, 0 },
+			{ 2, 0, 5, 5, 0, 5, 2, 4 }
+		}; 
 
 
 
@@ -261,12 +340,13 @@ public class GridManager : MonoBehaviour
 				Destroy (Grid [x, y]);
 			}
 		}
-		//change back later-----------------------------------------------------------------------------------------
+		//changed already-----------------------------------------------------------------------------------------
 		//StartCoroutine (CreateGrid ());
 		StartCoroutine (CreateGridTest ());
 	}
 
-	bool checkForBooster(Vector2 pos){
+	bool checkForBooster (Vector2 pos)
+	{
 
 		if (Grid [(int)pos.x, (int)pos.y].GetComponent<MoveScript> ().isBooster) {
 			return true;
@@ -275,7 +355,8 @@ public class GridManager : MonoBehaviour
 		}
 	}
 
-	public List<Vector2> getRowCol(Vector2 pos){
+	public List<Vector2> getRowCol (Vector2 pos)
+	{
 
 		List<Vector2> rowCol = new List<Vector2> ();
 
@@ -284,21 +365,21 @@ public class GridManager : MonoBehaviour
 
 		//add column
 		for (int r = 0; r < GridHeight; r++) {
-			rowCol.Add (new Vector2(col, r));
+			rowCol.Add (new Vector2 (col, r));
 		}
 
 		int row = (int)pos.y;
 
 		//add row
-		for(int c = 0; c < GridWidth; c++){
-			if (!rowCol.Contains (new Vector2(c, row))) {
-				rowCol.Add (new Vector2(c, row));
+		for (int c = 0; c < GridWidth; c++) {
+			if (!rowCol.Contains (new Vector2 (c, row))) {
+				rowCol.Add (new Vector2 (c, row));
 			}
 		}
 		
 		//print for debugging
 		string tiles = "Debugging";
-		foreach(Vector2 tile in rowCol){
+		foreach (Vector2 tile in rowCol) {
 			tiles += tile.x + ":" + tile.y + ", ";
 		}
 		Debug.Log (tiles);
@@ -333,10 +414,10 @@ public class GridManager : MonoBehaviour
 							}
 							
 							if (checkForBooster (match)) {
-								Debug.Log("Yeah one of the tiles in the match was a booster: " + match.x +":"+ match.y);
+								//	Debug.Log ("Yeah one of the tiles in the match was a booster: " + match.x + ":" + match.y);
 					
 								//get col and row of booster
-								List<Vector2> rowCol = getRowCol(match);
+								List<Vector2> rowCol = getRowCol (match);
 								foreach (Vector2 item in rowCol) {
 									if (!matchSets [index].Contains (item)) {
 										matchSets [index].Add (item);
@@ -395,10 +476,10 @@ public class GridManager : MonoBehaviour
 							}
 
 							if (checkForBooster (match)) {
-								Debug.Log("Yeah one of the tiles in the match was a booster: " + match.x +":"+ match.y);
+								//Debug.Log ("Yeah one of the tiles in the match was a booster: " + match.x + ":" + match.y);
 
 								//get col and row of booster
-								List<Vector2> rowCol = getRowCol(match);
+								List<Vector2> rowCol = getRowCol (match);
 								foreach (Vector2 item in rowCol) {
 									if (!matchSets [index].Contains (item)) {
 										matchSets [index].Add (item);
@@ -436,10 +517,10 @@ public class GridManager : MonoBehaviour
 				}
 
 				if (checkForBooster (match)) {
-					Debug.Log("Yeah one of the tiles in the match was a booster: " + match.x +":"+ match.y);
+					//Debug.Log ("Yeah one of the tiles in the match was a booster: " + match.x + ":" + match.y);
 
 					//get col and row of booster
-					List<Vector2> rowCol = getRowCol(match);
+					List<Vector2> rowCol = getRowCol (match);
 					foreach (Vector2 item in rowCol) {
 						if (!matchSets [index].Contains (item)) {
 							matchSets [index].Add (item);
@@ -500,12 +581,11 @@ public class GridManager : MonoBehaviour
 					if (tPos == lastTileMoved1 || tPos == lastTileMoved2) {
 						CreateNormalBooster (tPos);
 						boosterAdded = true;
-					} else if(tPos == matchSets[i].ElementAt(3) && boosterAdded == false){
+					} else if (tPos == matchSets [i].ElementAt (3) && boosterAdded == false) {
 						CreateNormalBooster (tPos);
 						boosterAdded = true; //should be redundant
 					
-					}
-					else {
+					} else {
 						DestroyTile (tPos);	
 					}
 					break;
@@ -513,11 +593,10 @@ public class GridManager : MonoBehaviour
 					if (tPos == lastTileMoved1 || tPos == lastTileMoved2) {
 						CreateSpecialBooster (tPos);
 						boosterAdded = true;
-					} else if(tPos == matchSets[i].ElementAt(4) && boosterAdded == false){
+					} else if (tPos == matchSets [i].ElementAt (4) && boosterAdded == false) {
 						CreateSpecialBooster (tPos);
 						boosterAdded = true; //should be redundant
-					}
-					else {
+					} else {
 						DestroyTile (tPos);	
 					}
 
@@ -553,11 +632,12 @@ public class GridManager : MonoBehaviour
 		}
 
 		//reset last tiles moved
-		lastTileMoved1 = new Vector2(-1,-1);
+		lastTileMoved1 = new Vector2 (-1, -1);
 		lastTileMoved2 = new Vector2 (-1, -1);
 	}
 
-	public IEnumerator DestroyTilesWithName(string name){
+	public IEnumerator DestroyTilesWithName (string name)
+	{
 
 		List<Vector2>[] matchSets = new List<Vector2>[100];
 		index = 0;
@@ -565,9 +645,9 @@ public class GridManager : MonoBehaviour
 		for (int x = 0; x < GridWidth; x++) {
 			for (int y = 0; y < GridHeight; y++) {
 
-				if (Grid[x,y] != null && Grid [x, y].GetComponent<MoveScript> ().getName() == name) {
+				if (Grid [x, y] != null && Grid [x, y].GetComponent<MoveScript> ().getName () == name) {
 					matchSets [index] = new List<Vector2> ();
-					matchSets [index].Add (new Vector2 (x,y));
+					matchSets [index].Add (new Vector2 (x, y));
 					index++;
 				
 				}
@@ -576,41 +656,48 @@ public class GridManager : MonoBehaviour
 
 		//Debug.Log ("Number of same items: " + index);
 		DestroyTiles (matchSets);
-		yield return new WaitForSeconds (0.15f);
+		yield return new WaitForSeconds (0.2f);
 		ReplaceTiles ();
 		yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
-		StartCoroutine (continousCheck());
+		StartCoroutine (continousCheck ());
 	}
-		
-	public void DestroyTile(Vector2 tPos){
 
-		Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
-		Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)] = null;
-		if (fatGrid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)] != null) {
-			Destroy (fatGrid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
-			fatGrid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)] = null;
+	public void DestroyTile (Vector2 tPos)
+	{
 
+		GameObject e = Instantiate (explosion, new Vector2 (tPos.x, tPos.y), Quaternion.identity) as GameObject;
+
+		Destroy (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]);
+		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = null;
+
+		if (fatOn) {
+			if (fatGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] != null) {
+				Destroy (fatGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]);
+				fatGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = null;
+
+			}
 		}
 	}
 
-	public void DisplayFeedback(int type){
-		GameObject f = Instantiate (feedback[type], new Vector2 (3.5f, 3.5f), Quaternion.identity) as GameObject;
+	public void DisplayFeedback (int type)
+	{
+		GameObject f = Instantiate (feedback [type], new Vector2 (3.5f, 3.5f), Quaternion.identity) as GameObject;
 	}
-		
+
 
 
 	public void CreateNormalBooster (Vector2 tPos)
 	{
 		DisplayFeedback (0);
-		int tileType = (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]).GetComponent<MoveScript> ().tileIndex;
+		int tileType = (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]).GetComponent<MoveScript> ().tileIndex;
 
-		DestroyTile (new Vector2(tPos.x,tPos.y));
+		DestroyTile (new Vector2 (tPos.x, tPos.y));
 		//Destroy (Grid [Mathf.RoundToInt(tPos.x),Mathf.RoundToInt(tPos.y)]);
-		GameObject tile = Instantiate (boosterPrefabs [tileType], new Vector2 (Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)), Quaternion.identity) as GameObject;
+		GameObject tile = Instantiate (boosterPrefabs [tileType], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
 		tile.GetComponent<MoveScript> ().setName (tileColours [tileType]);
 		tile.GetComponent<MoveScript> ().isBooster = true;
 		tile.GetComponent<MoveScript> ().tileIndex = tileType;
-		Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)] = tile;
+		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
 
 
 	}
@@ -618,20 +705,21 @@ public class GridManager : MonoBehaviour
 	public void CreateSpecialBooster (Vector2 tPos)
 	{
 		DisplayFeedback (0);
-		DestroyTile (new Vector2(tPos.x,tPos.y));
+		DestroyTile (new Vector2 (tPos.x, tPos.y));
 		//Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
-		GameObject tile = Instantiate (boosterPrefabs[7], new Vector2 (Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)), Quaternion.identity) as GameObject;
+		GameObject tile = Instantiate (boosterPrefabs [7], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
 		tile.GetComponent<MoveScript> ().setName ("water");
-		tile.GetComponent<MoveScript> ().isSpecialBooster= true;
-		Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)] = tile;
+		tile.GetComponent<MoveScript> ().isSpecialBooster = true;
+		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
+		//UpdateGridArray ();
 
 
 	}
 
 	public void SwapTiles (GameObject tile1, GameObject tile2)
 	{
-		lastTileMoved1 = new Vector2 (Mathf.RoundToInt(tile1.transform.position.x),Mathf.RoundToInt( tile1.transform.position.y));
-		lastTileMoved2 = new Vector2 (Mathf.RoundToInt(tile2.transform.position.x), Mathf.RoundToInt(tile2.transform.position.y));
+		lastTileMoved1 = new Vector2 (Mathf.RoundToInt (tile1.transform.position.x), Mathf.RoundToInt (tile1.transform.position.y));
+		lastTileMoved2 = new Vector2 (Mathf.RoundToInt (tile2.transform.position.x), Mathf.RoundToInt (tile2.transform.position.y));
 
 
 		//swap tiles on screen
@@ -660,7 +748,7 @@ public class GridManager : MonoBehaviour
 
 			//instantiate new tiles
 			for (int i = 0; i < missingTileCount; i++) {
-				int randomTileID = Random.Range (0, TilePrefabs.Length);
+				int randomTileID = Random.Range (0, TilePrefabs.Length - 1);
 				GameObject tile = Instantiate (TilePrefabs [randomTileID], new Vector2 (x, GridHeight + i), Quaternion.identity) as GameObject;
 				tile.GetComponent<MoveScript> ().setName (tileColours [randomTileID]);
 				tile.GetComponent<MoveScript> ().tileIndex = randomTileID;
@@ -683,6 +771,7 @@ public class GridManager : MonoBehaviour
 
 	public void UpdateGridArray ()
 	{
+		Debug.Log ("Updating Grid...");
 
 		for (int y = 0; y < GridHeight; y++) {
 			for (int x = 0; x < GridWidth; x++) {
@@ -691,6 +780,7 @@ public class GridManager : MonoBehaviour
 				if (hit) {
 					Grid [x, y] = hit.collider.gameObject as GameObject;
 					//Debug.Log ("hit at: " + x + "," + y);
+
 				}
 			}
 		}
@@ -698,19 +788,24 @@ public class GridManager : MonoBehaviour
 
 	public IEnumerator continousCheck ()
 	{
-
+		bool firstTime = true;
 		List<Vector2>[] matches;
 		do {
+			if (!firstTime || automate)//to prevent a double wait period
+			yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
 			UpdateGridArray (); //update grid
 			matches = getMatches (); //Retrieve any new matches
+
+
+
 			DestroyTiles (matches);	//Destroy tiles from matches
-			yield return new WaitForSeconds (0.15f);
+			yield return new WaitForSeconds (0.2f);
 			ReplaceTiles ();			//Replace these tiles
-			yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
+			firstTime = false;
 		} while(matches [0] != null);
 
 
-		PrintGrid (Grid);
+		//PrintGrid (Grid);
 		playerinput.currentState = GameState.None;
 
 		//if no more moves are possible then we need to reshuffle/recreate the grid
@@ -749,12 +844,14 @@ public class GridManager : MonoBehaviour
 				List<Vector2>[] matches = getMatches ();
 				if (matches [0] != null) {
 					//Debug.Log ("Swap " + x + ":" + y + "with " + (x + 1) + ":" + y);
-					Debug.Log ("there are potential HORIZONTAL moves");
-					DisplayMoves (Grid [x, y], Grid [x + 1, y]);
-					return true;
-				} else {
-					//Debug.Log ("no more HORIZONTAL moves");
-				}
+
+					//now check that no fat surrounds the two tiles
+					if (NoFatExists (new Vector2 (x, y), new Vector2 (x + 1, y))) {
+						Debug.Log ("there are potential HORIZONTAL moves");
+						DisplayMoves (Grid [x, y], Grid [x + 1, y]);
+						return true;
+					}
+				} 
 				Grid = fakeGrid;
 
 
@@ -763,7 +860,7 @@ public class GridManager : MonoBehaviour
 
 
 
-		//now swap with neighbor underneath
+		//now swap with neighbour underneath
 		for (int x = 0; x <= 7; x++) {
 			for (int y = 7; y >= 1; y--) {
 				GameObject[,] TempGrid = new GameObject[GridWidth, GridHeight];
@@ -780,9 +877,13 @@ public class GridManager : MonoBehaviour
 				List<Vector2>[] matches = getMatches ();
 				if (matches [0] != null) {
 					//Debug.Log ("Swap " + x + ":" + y + "with " + x + ":" + (y - 1));
-					Debug.Log ("there are potential Vertical moves");
-					DisplayMoves (Grid [x, y], Grid [x, y - 1]);
-					return true;
+
+					//now check that no fat surrounds the two tiles
+					if (NoFatExists (new Vector2 (x, y), new Vector2 (x, y - 1))) {
+						Debug.Log ("there are potential Vertical moves");
+						DisplayMoves (Grid [x, y], Grid [x, y - 1]);
+						return true;
+					}
 				} else {
 					//Debug.Log ("no more Vertical moves");
 				}
@@ -795,11 +896,30 @@ public class GridManager : MonoBehaviour
 		return false;
 	}
 
+
+	//checks if a fat block should stop the user from making a move
+	public bool NoFatExists (Vector2 aPos, Vector2 bPos)
+	{
+		if (!fatOn) {
+			return true;
+		}
+
+		if (fatGrid [Mathf.RoundToInt (aPos.x), Mathf.RoundToInt (aPos.y)] == null && fatGrid [Mathf.RoundToInt (bPos.x), Mathf.RoundToInt (bPos.y)] == null) {
+			return true;
+		}
+		return false;
+
+	}
+
 	void DisplayMoves (GameObject firstTile, GameObject secondTile)
 	{
-
-		firstTile.GetComponent<MoveScript> ().Flash ();
-		secondTile.GetComponent<MoveScript> ().Flash ();
+		if (automate) {
+			SwapTiles (firstTile, secondTile);
+			StartCoroutine (continousCheck ());
+		} else {
+			firstTile.GetComponent<MoveScript> ().Flash ();
+			secondTile.GetComponent<MoveScript> ().Flash ();
+		}
 
 	}
 

@@ -36,6 +36,8 @@ public class PlayerInput : MonoBehaviour
 					SelectTile ();
 				} 
 			} else if (Input.GetKey (KeyCode.Mouse0)) {
+
+
 				if (activeTile != null) {
 					StartCoroutine (AttemptMove ());
 				}
@@ -62,51 +64,65 @@ public class PlayerInput : MonoBehaviour
 		}
 	}
 
+
+
+
 	IEnumerator AttemptMove ()
 	{
+
+
 
 		//Debug.Log ("attempted move");
 		Vector2 tilePos = new Vector2 (Camera.main.ScreenToWorldPoint (Input.mousePosition).x, Camera.main.ScreenToWorldPoint (Input.mousePosition).y);
 		RaycastHit2D hit = Physics2D.Raycast (tilePos, Vector2.zero, 0f);
 
+
 		if (hit) {
-			if (NeighborCheck (hit.collider.gameObject)) {
-				currentState = GameState.Animating;
 
-				//swap tiles
-				gm.SwapTiles (activeTile, hit.collider.gameObject);		//swap
-				yield return new WaitForSeconds (gm.swapTime);				//wait
-				gm.UpdateGridArray ();									//update
+			//if statement stops from switching tiles that are surrounded in fat
+			if (gm.NoFatExists (new Vector2 (activeTile.transform.position.x, activeTile.transform.position.y), new Vector2 (hit.collider.gameObject.transform.position.x, hit.collider.gameObject.transform.position.y))) {
+				//Debug.Log ("Move is allowed");
+			
+				if (NeighborCheck (hit.collider.gameObject)) {
+					currentState = GameState.Animating;
 
-				if (CheckForSpecialBooster (activeTile, hit.collider.gameObject) == true) {
+					//swap tiles
+					gm.SwapTiles (activeTile, hit.collider.gameObject);		//swap
+					yield return new WaitForSeconds (gm.swapTime);				//wait
+					//gm.UpdateGridArray ();									//update
+
+					if (CheckForSpecialBooster (activeTile, hit.collider.gameObject) == false) {
 					
-				} else {
+				
 
 
-					//check for matches after grid has been updated
-					List<Vector2>[] matches;
-					matches = gm.getMatches (); //Retrieve any new matches
+						//check for matches after grid has been updated
+						List<Vector2>[] matches;
+						matches = gm.getMatches (); //Retrieve any new matches
 
 
-					//if no matches of atleast 3, swap tiles back
-					if (matches [0] == null) {
+						//if no matches of atleast 3, swap tiles back
+						if (matches [0] == null) {
 					
-						gm.SwapTiles (activeTile, hit.collider.gameObject); 		//swap back
-						yield return new WaitForSeconds (gm.swapTime);				//wait
-						gm.UpdateGridArray ();									//update
-						currentState = GameState.None;
-					} else {
+							gm.SwapTiles (activeTile, hit.collider.gameObject); 		//swap back
+							yield return new WaitForSeconds (gm.swapTime);				//wait
+							gm.UpdateGridArray ();									//update
+							currentState = GameState.None;
+						} else {
 
-						UpdateMovesLeft ();
-						StartCoroutine (gm.continousCheck ());
+							UpdateMovesLeft ();
+							StartCoroutine (gm.continousCheck ());
+						}
+
+						activeTile = null; //set to null to allow next move
 					}
-
-					activeTile = null; //set to null to allow next move
-	
+				
 				}
 			}
 
 		}
+	
+		
 	}
 
 	void UpdateMovesLeft ()
@@ -124,7 +140,7 @@ public class PlayerInput : MonoBehaviour
 
 		//logic for when a swap is made with a special booster
 		if (tile1.GetComponent<MoveScript> ().getName () == "water") {
-			gm.Grid[Mathf.RoundToInt(tile1.transform.position.x), Mathf.RoundToInt(tile1.transform.position.y)] = null;
+			gm.Grid [Mathf.RoundToInt (tile1.transform.position.x), Mathf.RoundToInt (tile1.transform.position.y)] = null;
 			Destroy (tile1);
 			StartCoroutine (gm.DestroyTilesWithName (tile2.GetComponent<MoveScript> ().getName ()));
 			UpdateMovesLeft ();
@@ -132,7 +148,7 @@ public class PlayerInput : MonoBehaviour
 			return true;
 
 		} else if (tile2.GetComponent<MoveScript> ().getName () == "water") {
-			gm.Grid[Mathf.RoundToInt(tile2.transform.position.x), Mathf.RoundToInt(tile2.transform.position.y)] = null;
+			gm.Grid [Mathf.RoundToInt (tile2.transform.position.x), Mathf.RoundToInt (tile2.transform.position.y)] = null;
 			Destroy (tile2);
 			StartCoroutine (gm.DestroyTilesWithName (tile1.GetComponent<MoveScript> ().getName ()));
 			UpdateMovesLeft ();

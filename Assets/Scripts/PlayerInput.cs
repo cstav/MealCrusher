@@ -89,7 +89,7 @@ public class PlayerInput : MonoBehaviour
 					//swap tiles
 					gm.SwapTiles (activeTile, hit.collider.gameObject);		//swap
 					yield return new WaitForSeconds (gm.swapTime);				//wait
-					//gm.UpdateGridArray ();									//update
+					gm.UpdateGridArray ();									//update
 
 					if (CheckForSpecialBooster (activeTile, hit.collider.gameObject) == false) {
 					
@@ -109,7 +109,7 @@ public class PlayerInput : MonoBehaviour
 							gm.UpdateGridArray ();									//update
 							currentState = GameState.None;
 						} else {
-
+							Debug.Log ("there are matches");
 							UpdateMovesLeft ();
 							StartCoroutine (gm.continousCheck ());
 						}

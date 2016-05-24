@@ -790,12 +790,40 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 	{
 		bool firstTime = true;
 		List<Vector2>[] matches;
+
+		//update grid
+		//retrive matches
+
+		//while matches exist
+		//destroy the tiles
+		//replace the tiles
+		//update the grid
+
 		do {
 			if (!firstTime || automate)//to prevent a double wait period
 			yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
 			UpdateGridArray (); //update grid
 			matches = getMatches (); //Retrieve any new matches
+			if(matches [0] == null)break;
 
+			//check if matches are near cigarettes
+			if (cigOn) {
+				int surroundingCigs = 0;
+
+				for (int i = 0; i < index; i++) {
+					foreach (Vector2 tPos in matches[i]) {
+						if (CheckForAdjCigs (tPos)) {
+							surroundingCigs++;
+						}
+					}
+				}
+
+				if (surroundingCigs < 1 && cigCount > 0) {
+					Debug.Log ("Spawn a cigarette");
+				} else {
+					Debug.Log ("Delete a cigarette");
+				}
+			}
 
 
 			DestroyTiles (matches);	//Destroy tiles from matches
@@ -803,6 +831,14 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 			ReplaceTiles ();			//Replace these tiles
 			firstTime = false;
 		} while(matches [0] != null);
+
+
+
+
+	
+
+
+
 
 
 		//PrintGrid (Grid);

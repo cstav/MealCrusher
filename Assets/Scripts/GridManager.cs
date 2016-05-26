@@ -28,7 +28,7 @@ public class GridManager : MonoBehaviour
 	public GameObject fattyBlock;
 	int fatLeft = 0;
 	//to toggle fat blocks on and off
-	bool fatOn = true;
+	bool fatOn = false;
 	//to toggle ciggarettes on and off
 	bool cigOn = true;
 	//for the game to play by itself
@@ -403,11 +403,10 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		//check horizontal matches
 		for (int y = 0; y < GridHeight; y++) {
 			for (int x = 0; x < GridWidth; x++) {
-
+				
 				if (currentName != Grid [x, y].GetComponent<MoveScript> ().getName ()) {
 
-					//makes sure cigarettes arent matchable
-					if (matchPositions.Count >= 3 && currentName != "ciggy") {
+					if (matchPositions.Count >= 3) {
 
 						matchSets [index] = new List<Vector2> ();
 						foreach (Vector2 match in matchPositions) {
@@ -417,8 +416,6 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 							}
 							
 							if (checkForBooster (match)) {
-								//	Debug.Log ("Yeah one of the tiles in the match was a booster: " + match.x + ":" + match.y);
-					
 								//get col and row of booster
 								List<Vector2> rowCol = getRowCol (match);
 								foreach (Vector2 item in rowCol) {
@@ -435,9 +432,11 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 
 					currentName = Grid [x, y].GetComponent<MoveScript> ().getName ();
 					matchPositions.Clear ();
-					matchPositions.Add (new Vector2 (x, y));
+					if (currentName != "ciggy")
+						matchPositions.Add (new Vector2 (x, y));
 				} else {
-					matchPositions.Add (new Vector2 (x, y));
+					if (currentName != "ciggy")
+						matchPositions.Add (new Vector2 (x, y));
 				}
 
 			}
@@ -447,9 +446,9 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		}
 
 		//after scanning the whole grid we need to check if 3 or more tiles matched again...
+		Debug.Log ("current name: " + currentName);
 
-
-		if (matchPositions.Count >= 3 && currentName != "ciggy") {
+		if (matchPositions.Count >= 3) {
 			matchSets [index] = new List<Vector2> (); //create new list
 
 			//add all matches to new list
@@ -467,21 +466,20 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		
 		for (int x = 0; x < GridWidth; x++) {
 			for (int y = 0; y < GridHeight; y++) {
-				
+
 				if (currentName != Grid [x, y].GetComponent<MoveScript> ().getName ()) {
 					
-					if (matchPositions.Count >= 3 && currentName != "ciggy") {
+					if (matchPositions.Count >= 3) {
 
 						matchSets [index] = new List<Vector2> ();
 						foreach (Vector2 match in matchPositions) {
 
+							//ensures there are no duplicates
 							if (!matchSets [index].Contains (match)) {
 								matchSets [index].Add (match);
 							}
 
 							if (checkForBooster (match)) {
-								//Debug.Log ("Yeah one of the tiles in the match was a booster: " + match.x + ":" + match.y);
-
 								//get col and row of booster
 								List<Vector2> rowCol = getRowCol (match);
 								foreach (Vector2 item in rowCol) {
@@ -498,9 +496,11 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 					
 					currentName = Grid [x, y].GetComponent<MoveScript> ().getName ();
 					matchPositions.Clear ();
-					matchPositions.Add (new Vector2 (x, y));
+					if (currentName != "ciggy")
+						matchPositions.Add (new Vector2 (x, y));
 				} else {
-					matchPositions.Add (new Vector2 (x, y));
+					if (currentName != "ciggy")
+						matchPositions.Add (new Vector2 (x, y));
 				}
 				
 			}
@@ -510,8 +510,9 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		}
 			
 		//after scanning the whole grid we need to check if 3 or more tiles matched again...
+		Debug.Log ("current name: " + currentName);
 
-		if (matchPositions.Count >= 3 && currentName != "ciggy") {
+		if (matchPositions.Count >= 3) {
 
 			matchSets [index] = new List<Vector2> ();
 			foreach (Vector2 match in matchPositions) {
@@ -721,7 +722,8 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 
 	}
 
-	public void CreateCigarette(Vector2 tPos){
+	public void CreateCigarette (Vector2 tPos)
+	{
 		
 		DestroyTile (new Vector2 (tPos.x, tPos.y));
 		//Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
@@ -801,16 +803,28 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		}
 	}
 
-	bool CigsDestroyed(List<Vector2>[] matches){
+	string getTileName (Vector2 tPos)
+	{
+
+		return Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)].GetComponent<MoveScript> ().getName ();
+
+	}
+
+	//******* we shouldnt be checking a cigarette for adjacent cigs *********
+	bool CigsDestroyed (List<Vector2>[] matches)
+	{
 		//change this name
 		bool dontSpawnCig = true;
 
 		//check if matches are near cigarettes
 
-			List<Vector2> adjacentCigs;
-			List<Vector2> cigsToDestroy = new List<Vector2> ();
-			for (int i = 0; i < index; i++) {
-				foreach (Vector2 tPos in matches[i]) {
+		List<Vector2> adjacentCigs;
+		List<Vector2> cigsToDestroy = new List<Vector2> ();
+		for (int i = 0; i < index; i++) {
+			foreach (Vector2 tPos in matches[i]) {
+
+				//if a cigarette is in matches we dont want to destroy its adjacent cigarettes
+				if (getTileName (tPos) != "ciggy") {
 					adjacentCigs = GetAdjCigs (tPos);
 					foreach (Vector2 cigarette in adjacentCigs) {
 						cigsToDestroy.Add (cigarette);
@@ -818,28 +832,30 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 					}
 				}
 			}
+		}
 
 
-			if (cigsToDestroy.Count == 0 && cigCount > 0) {
+		if (cigsToDestroy.Count == 0 && cigCount > 0) {
 				
-				dontSpawnCig = false;
+			dontSpawnCig = false;
 
-			} else {
-				Debug.Log ("Delete a cigarette");
-				foreach(Vector2 cigarette in cigsToDestroy){
-					DestroyTile(cigarette);
-				}
+		} else {
+			Debug.Log ("Delete a cigarette");
+			foreach (Vector2 cigarette in cigsToDestroy) {
+				DestroyTile (cigarette);
 			}
+		}
 		
 
 		return dontSpawnCig;
 	}
 
-	void SpawnCig(int row, int col){
+	void SpawnCig (int row, int col)
+	{
 
 		//spawn a cig in the first available cel in the row
-		for(int y = 0; y < GridWidth; y++){
-			for (int x= 0; x < GridHeight; x++) {
+		for (int y = row; y < GridWidth; y++) {
+			for (int x = col; x < GridHeight; x++) {
 				if (Grid [x, y].GetComponent<MoveScript> ().getName () != "ciggy") {
 
 
@@ -881,15 +897,15 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 			if (matches [0] == null)
 				break;
 
-			if(cigOn){
-				if(!CigsDestroyed(matches)){
+			if (cigOn) {
+				if (!CigsDestroyed (matches)) {
 					//Debug.Log ("Spawn a cigarette");
-					SpawnCig(0,0);
+					SpawnCig (3, 0);
 				}
 			}
 
-			Debug.Log("printing matchsets");
-			printMatchSets(matches);
+			Debug.Log ("printing matchsets");
+			printMatchSets (matches);
 			DestroyTiles (matches);	//Destroy tiles from matches
 			yield return new WaitForSeconds (0.2f);
 			ReplaceTiles ();			//Replace these tiles

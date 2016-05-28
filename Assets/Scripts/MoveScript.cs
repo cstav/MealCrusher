@@ -5,13 +5,12 @@ using System.Threading;
 public class MoveScript : MonoBehaviour {
 
 	private GridManager gm;
-	private string name;
+	private string tileName;
 	private float currentAlpha;
 	float decrease = 0.1f;
 	public bool isBooster = false;
 	public bool isSpecialBooster = false;
 	public int tileIndex;
-
 
 	void Awake(){
 
@@ -38,11 +37,11 @@ public class MoveScript : MonoBehaviour {
 	}
 
 	public void setName(string colour){
-		this.name = colour;
+		this.tileName = colour;
 	}
 
 	public string getName(){
-		return name;
+		return tileName;
 	}
 		
 
@@ -54,6 +53,7 @@ public class MoveScript : MonoBehaviour {
 		StopFlashing ();
 
 		int missingTileCount = 0;
+	
 
 		for (int y = Mathf.RoundToInt(transform.position.y); y>=0; y--) {
 
@@ -61,6 +61,7 @@ public class MoveScript : MonoBehaviour {
 			if(!hit){
 				missingTileCount++;
 			}
+
 		}
 
 		if (missingTileCount > 0) {

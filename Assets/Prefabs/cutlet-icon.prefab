@@ -55,8 +55,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9bbe48777ea445c79f267f7eafd38a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  position: {x: 0, y: 0}
   isBooster: 0
+  isSpecialBooster: 0
   tileIndex: 0
 --- !u!212 &21232150
 SpriteRenderer:

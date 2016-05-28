@@ -32,7 +32,7 @@ public class GridManager : MonoBehaviour
 	//to toggle ciggarettes on and off
 	bool cigOn = true;
 	//for the game to play by itself
-	bool automate = false;
+	public bool automate = false;
 	public GameObject[] feedback;
 	public GameObject explosion;
 	int cigCount = 2;
@@ -44,73 +44,7 @@ public class GridManager : MonoBehaviour
 
 	PlayerInput playerinput;
 	ScoreHandler scorehandler;
-
-	/*
-Methods that i need for the ciggarettes
-
-int cigsCount;
-int surroundingCigs;
-bool CigsNearby();
-
-
-Maybe when you retreive the matches, we should loop through those matches and do a CheckForAdjCigs() on all of them
-The int surroundingCigs can be incremented everytime checkForAdjCigs returns true.
-
-if we have reached the end of the list and surroundcigs = 0 but cigCount > 0, then we need to respawn a new cigarette
-We spawn a cigarette by deleting the existing tile and replacing it with a cigarette
-
-When we respawn a new cigarette, we want it to be situated adjacent to an existing cigarette, and increment the cigs count
-In order to keep these adjacent maybe we should:
-		next available horizontal position
-		next available vertical position
-		
-
-if we have reached the end of the list and surroundingcigs > 0, me must destroy the adjacent cigarretes and decrement the cigsCount
-accordingly
-
-After destroying these tiles, they will need to be replaced
-
-**NOTE**
-Cigarettes should never move position so they should never respond to gravity
-This also means that, when other tiles are checking missing tiles below, cigarettes should act as a missing tile
-
-
-
-*/
-
-	List<Vector2> GetAdjCigs (Vector2 tPos)
-	{
-		List<Vector2> adjacentCigs = new List<Vector2> ();
-		int x = Mathf.RoundToInt (tPos.x);
-		int y = Mathf.RoundToInt (tPos.y);
-
-		//check above
-		if (y < 7) {
-			if (Grid [x, y + 1].GetComponent<MoveScript> ().getName () == "ciggy") {
-				adjacentCigs.Add (new Vector2 (x, y + 1));
-			}
-		}
-		//check below
-		if (y > 0) {
-			if (Grid [x, y - 1].GetComponent<MoveScript> ().getName () == "ciggy") {
-				adjacentCigs.Add (new Vector2 (x, y - 1));
-			}
-		}
-		//check right
-		if (x < 7) {
-			if (Grid [x + 1, y].GetComponent<MoveScript> ().getName () == "ciggy") {
-				adjacentCigs.Add (new Vector2 (x + 1, y));
-			}
-		}
-		//check left
-		if (x > 0) {
-			if (Grid [x - 1, y].GetComponent<MoveScript> ().getName () == "ciggy") {
-				adjacentCigs.Add (new Vector2 (x - 1, y));
-			}
-		}
-
-		return adjacentCigs;
-	}
+	Sounds sounds;
 
 	void Awake ()
 	{
@@ -124,6 +58,7 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 
 		scorehandler = GameObject.Find ("scoretext").GetComponent<ScoreHandler> ();
 		playerinput = GameObject.Find ("GameController").GetComponent<PlayerInput> ();
+		sounds = Camera.main.GetComponent<Sounds> ();
 
 		source = gameObject.GetComponent<AudioSource> ();
 		tileColours = new string[7];
@@ -143,6 +78,40 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 	
 
 
+	}
+
+	List<Vector2> GetAdjCigs (Vector2 tPos)
+	{
+		List<Vector2> adjacentCigs = new List<Vector2> ();
+		int x = Mathf.RoundToInt (tPos.x);
+		int y = Mathf.RoundToInt (tPos.y);
+
+		//check above
+		if (y < 7) {
+			if (Grid [x, y + 1] != null && Grid [x, y + 1].GetComponent<MoveScript> ().getName () == "ciggy") {
+				adjacentCigs.Add (new Vector2 (x, y + 1));
+			}
+		}
+		//check below
+		if (y > 0) {
+			if (Grid [x, y - 1] != null && Grid [x, y - 1].GetComponent<MoveScript> ().getName () == "ciggy") {
+				adjacentCigs.Add (new Vector2 (x, y - 1));
+			}
+		}
+		//check right
+		if (x < 7) {
+			if (Grid [x + 1, y] != null && Grid [x + 1, y].GetComponent<MoveScript> ().getName () == "ciggy") {
+				adjacentCigs.Add (new Vector2 (x + 1, y));
+			}
+		}
+		//check left
+		if (x > 0) {
+			if (Grid [x - 1, y] != null && Grid [x - 1, y].GetComponent<MoveScript> ().getName () == "ciggy" ) {
+				adjacentCigs.Add (new Vector2 (x - 1, y));
+			}
+		}
+
+		return adjacentCigs;
 	}
 
 	void CreateFatBlocks ()
@@ -230,8 +199,9 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 							{2,0,5,5,0,5,2,4}}; 
 							*/
 
-		//5 in a row
 
+		//5 in a row
+		/*
 		int[,] testGrid5 = {{ 4, 5, 6, 4, 2, 3, 0, 3 },
 			{ 3, 4, 6, 1, 2, 5, 5, 3 },
 			{ 2, 1, 1, 0, 1, 1, 5, 2 },
@@ -242,7 +212,31 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 			{ 2, 0, 5, 5, 0, 5, 2, 4 }
 		}; 
 
+		*/
+		//cigarette drop test
 
+		int[,] testGrid5 = {{ 4, 5, 2, 6, 2, 3, 0, 3 },
+			{ 3, 4, 4, 6, 2, 5, 5, 3 },
+			{ 2, 1, 1, 6, 1, 1, 5, 2 },
+			{ 2, 5, 2, 6, 2, 3, 0, 3 },
+			{ 2, 3, 5, 6, 2, 1, 5, 5 },
+			{ 2, 2, 4, 6, 3, 5, 5, 0 },
+			{ 2, 0, 2, 6, 5, 4, 4, 0 },
+			{ 4, 0, 5, 6, 0, 5, 2, 4 }
+		}; 
+
+		/*
+		//no possible matches except special booster
+		int[,] testGrid5 = {{ 1, 4, 2, 5, 3, 1, 4, 2 },
+							{ 2, 5, 3, 1, 4, 2, 5, 4 },
+							{ 3, 1, 4, 2, 5, 3, 1, 4 },
+							{ 4, 2, 5, 3, 1, 4, 2, 4 },
+							{ 5, 3, 1, 4, 2, 5, 3, 4 },
+							{ 1, 4, 2, 5, 3, 1, 4, 4 },
+							{ 2, 5, 3, 1, 4, 2, 5, 3 },
+							{ 3, 1, 4, 2, 5, 3, 1, 4 }
+						}; 
+		*/
 		//4 in a row
 		/*
 		int[,] testGrid = { { 4, 5, 6, 4, 2, 3, 0, 3 },
@@ -308,7 +302,9 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 					randomTile = testGrid [x, y];
 				}
 
-
+				if (randomTile == 6) {
+					cigCount++;
+				}
 				GameObject tile = Instantiate (TilePrefabs [randomTile], new Vector2 (x, y), Quaternion.identity) as GameObject;
 				tile.GetComponent<MoveScript> ().tileIndex = randomTile;
 				Grid [x, y] = tile;
@@ -329,9 +325,6 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 	public void SpaceBarFunction ()
 	{
 		ReplaceGrid ();
-
-
-
 	}
 
 	void ReplaceGrid ()
@@ -345,6 +338,18 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		//changed already-----------------------------------------------------------------------------------------
 		//StartCoroutine (CreateGrid ());
 		StartCoroutine (CreateGridTest ());
+	}
+
+	bool CheckGridForSpecBooster(){
+
+		for (int x = 0; x < GridWidth; x++) {
+			for (int y = 0; y < GridHeight; y++) {
+				if (Grid [x, y].GetComponent<MoveScript> ().isSpecialBooster) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	bool checkForBooster (Vector2 pos)
@@ -361,8 +366,6 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 	{
 
 		List<Vector2> rowCol = new List<Vector2> ();
-
-
 		int col = (int)pos.x;
 
 		//add column
@@ -379,17 +382,17 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 			}
 		}
 		
-		//print for debugging
-		string tiles = "Debugging";
-		foreach (Vector2 tile in rowCol) {
-			tiles += tile.x + ":" + tile.y + ", ";
-		}
-		Debug.Log (tiles);
+//		//print for debugging
+//		string tiles = "Debugging";
+//		foreach (Vector2 tile in rowCol) {
+//			tiles += tile.x + ":" + tile.y + ", ";
+//		}
+//		Debug.Log (tiles);
 
 		return rowCol;
 	}
 
-	public List<Vector2>[] getMatches ()
+	public List<Vector2>[] getMatches (GameObject[,] gridToCheck)
 	{
 		List<Vector2> matchPositions = new List<Vector2> ();
 
@@ -404,7 +407,7 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		for (int y = 0; y < GridHeight; y++) {
 			for (int x = 0; x < GridWidth; x++) {
 				
-				if (currentName != Grid [x, y].GetComponent<MoveScript> ().getName ()) {
+				if (currentName != gridToCheck [x, y].GetComponent<MoveScript> ().getName ()) {
 
 					if (matchPositions.Count >= 3) {
 
@@ -414,7 +417,6 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 							if (!matchSets [index].Contains (match)) {
 								matchSets [index].Add (match);
 							}
-							
 							if (checkForBooster (match)) {
 								//get col and row of booster
 								List<Vector2> rowCol = getRowCol (match);
@@ -423,14 +425,12 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 										matchSets [index].Add (item);
 									}
 								}
-
 							}
-
 						}
 						index++; //change the index
 					}
 
-					currentName = Grid [x, y].GetComponent<MoveScript> ().getName ();
+					currentName = gridToCheck [x, y].GetComponent<MoveScript> ().getName ();
 					matchPositions.Clear ();
 					if (currentName != "ciggy")
 						matchPositions.Add (new Vector2 (x, y));
@@ -438,16 +438,12 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 					if (currentName != "ciggy")
 						matchPositions.Add (new Vector2 (x, y));
 				}
-
 			}
 			//at the end set colour back to none
 			currentName = "none";
-
 		}
 
-		//after scanning the whole grid we need to check if 3 or more tiles matched again...
-		Debug.Log ("current name: " + currentName);
-
+		//after scanning the whole grid we need to check if 3 or more tiles matched again..
 		if (matchPositions.Count >= 3) {
 			matchSets [index] = new List<Vector2> (); //create new list
 
@@ -455,7 +451,6 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 			foreach (Vector2 match in matchPositions) {
 				matchSets [index].Add (match);
 			}
-
 			index++; //change the index
 		}
 
@@ -467,7 +462,7 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		for (int x = 0; x < GridWidth; x++) {
 			for (int y = 0; y < GridHeight; y++) {
 
-				if (currentName != Grid [x, y].GetComponent<MoveScript> ().getName ()) {
+				if (currentName != gridToCheck [x, y].GetComponent<MoveScript> ().getName ()) {
 					
 					if (matchPositions.Count >= 3) {
 
@@ -487,14 +482,12 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 										matchSets [index].Add (item);
 									}
 								}
-
 							}
-
 						}
 						index++; //change the index
 					}
 					
-					currentName = Grid [x, y].GetComponent<MoveScript> ().getName ();
+					currentName = gridToCheck [x, y].GetComponent<MoveScript> ().getName ();
 					matchPositions.Clear ();
 					if (currentName != "ciggy")
 						matchPositions.Add (new Vector2 (x, y));
@@ -502,16 +495,12 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 					if (currentName != "ciggy")
 						matchPositions.Add (new Vector2 (x, y));
 				}
-				
 			}
 			//at the end set colour back to none
 			currentName = "none";
-			
 		}
 			
 		//after scanning the whole grid we need to check if 3 or more tiles matched again...
-		Debug.Log ("current name: " + currentName);
-
 		if (matchPositions.Count >= 3) {
 
 			matchSets [index] = new List<Vector2> ();
@@ -522,7 +511,7 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 				}
 
 				if (checkForBooster (match)) {
-					//Debug.Log ("Yeah one of the tiles in the match was a booster: " + match.x + ":" + match.y);
+					//Debug.Log ("One of the tiles in the match was a booster: " + match.x + ":" + match.y);
 
 					//get col and row of booster
 					List<Vector2> rowCol = getRowCol (match);
@@ -531,20 +520,15 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 							matchSets [index].Add (item);
 						}
 					}
-
 				}
-
 			}
 			index++; //change the index
 		}
-
-
 		return matchSets;
 	}
 
 	public void printMatchSets (List<Vector2>[] matchSets)
 	{
-
 		for (int i = 0; i < index; i++) {
 
 			string set = "";
@@ -553,8 +537,6 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 			}
 			Debug.Log (set);
 		}
-
-
 	}
 
 	public void DestroyTiles (List<Vector2>[] matchSets)
@@ -565,20 +547,14 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		if (matchSets [0] != null) {
 			source.PlayOneShot (zap);
 		}
-
-
-
+			
 		for (int i = 0; i < index; i++) {
-
-	
-
 			int matchCount = matchSets [i].Count;
 			//Vector2 boosterPos = new Vector2 ();
 			bool boosterAdded = false;
 
 			//destroy all tiles in all sets
 			foreach (Vector2 tPos in matchSets[i]) {
-
 
 				//Boosters Code
 				switch (matchSets [i].Count) {
@@ -591,7 +567,7 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 						boosterAdded = true; //should be redundant
 					
 					} else {
-						DestroyTile (tPos);	
+						DestroyTile (tPos, true);	
 					}
 					break;
 				case 5:
@@ -602,13 +578,11 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 						CreateSpecialBooster (tPos);
 						boosterAdded = true; //should be redundant
 					} else {
-						DestroyTile (tPos);	
+						DestroyTile (tPos, true);	
 					}
-
-
 					break;
 				default: 
-					DestroyTile (tPos);	
+					DestroyTile (tPos, true);	
 					break;
 				}
 			}
@@ -654,12 +628,18 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 					matchSets [index] = new List<Vector2> ();
 					matchSets [index].Add (new Vector2 (x, y));
 					index++;
-				
 				}
 			}
 		}
 
-		//Debug.Log ("Number of same items: " + index);
+
+		if (cigOn) {
+			if (!CigsDestroyed (matchSets)) {
+				//Debug.Log ("Spawn a cigarette");
+					SpawnCig (3, 0);
+			}
+		}
+
 		DestroyTiles (matchSets);
 		yield return new WaitForSeconds (0.2f);
 		ReplaceTiles ();
@@ -667,11 +647,12 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		StartCoroutine (continousCheck ());
 	}
 
-	public void DestroyTile (Vector2 tPos)
+	public void DestroyTile (Vector2 tPos, bool explode)
 	{
 		
-
-		GameObject e = Instantiate (explosion, new Vector2 (tPos.x, tPos.y), Quaternion.identity) as GameObject;
+		if (explode) {
+			GameObject e = Instantiate (explosion, new Vector2 (tPos.x, tPos.y), Quaternion.identity) as GameObject;
+		} 
 
 		Destroy (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]);
 		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = null;
@@ -680,57 +661,49 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 			if (fatGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] != null) {
 				Destroy (fatGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]);
 				fatGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = null;
-
 			}
 		}
 	}
 
 	public void DisplayFeedback (int type)
 	{
-		GameObject f = Instantiate (feedback [type], new Vector2 (3.5f, 3.5f), Quaternion.identity) as GameObject;
+		Instantiate (feedback [type], new Vector2 (3.5f, 3.5f), Quaternion.identity);
 	}
-
-
-
+		
 	public void CreateNormalBooster (Vector2 tPos)
 	{
 		DisplayFeedback (0);
 		int tileType = (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]).GetComponent<MoveScript> ().tileIndex;
 
-		DestroyTile (new Vector2 (tPos.x, tPos.y));
+		DestroyTile (new Vector2 (tPos.x, tPos.y), true);
 		//Destroy (Grid [Mathf.RoundToInt(tPos.x),Mathf.RoundToInt(tPos.y)]);
 		GameObject tile = Instantiate (boosterPrefabs [tileType], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
 		tile.GetComponent<MoveScript> ().setName (tileColours [tileType]);
 		tile.GetComponent<MoveScript> ().isBooster = true;
 		tile.GetComponent<MoveScript> ().tileIndex = tileType;
 		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
-
-
 	}
 
 	public void CreateSpecialBooster (Vector2 tPos)
 	{
 		DisplayFeedback (0);
-		DestroyTile (new Vector2 (tPos.x, tPos.y));
+		DestroyTile (new Vector2 (tPos.x, tPos.y), true);
 		//Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
 		GameObject tile = Instantiate (boosterPrefabs [7], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
 		tile.GetComponent<MoveScript> ().setName ("water");
 		tile.GetComponent<MoveScript> ().isSpecialBooster = true;
 		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
-
-
-
 	}
 
 	public void CreateCigarette (Vector2 tPos)
 	{
-		
-		DestroyTile (new Vector2 (tPos.x, tPos.y));
-		//Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
-		GameObject tile = Instantiate (TilePrefabs [6], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
-		tile.GetComponent<MoveScript> ().setName ("ciggy");
-		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
 
+			DestroyTile (new Vector2 (tPos.x, tPos.y), false);
+			//Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
+			GameObject tile = Instantiate (TilePrefabs [6], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
+			tile.GetComponent<MoveScript> ().setName ("ciggy");
+			Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
+			sounds.PlaySound ();
 	}
 
 	public void SwapTiles (GameObject tile1, GameObject tile2)
@@ -745,8 +718,6 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		//iTween.MoveTo (tile1, iTween.Hash ("x", tile2.transform.position.x, "y", tile2.transform.position.y, "time", 1.0f, "oncomplete", "UpdateGridArray", "oncompletetarget", gameObject));
 		iTween.MoveTo (tile1, iTween.Hash ("x", tile2.transform.position.x, "y", tile2.transform.position.y, "time", swapTime));
 		iTween.MoveTo (tile2, iTween.Hash ("x", tempPos.x, "y", tempPos.y, "time", swapTime));
-
-
 	}
 
 	public void ReplaceTiles ()
@@ -775,6 +746,7 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 
 		foreach (GameObject t in Grid) {
 
+			//if (t != null && t.GetComponent<MoveScript>().getName() != "ciggy")
 			if (t != null)
 				t.GetComponent<MoveScript> ().GravityCheck ();
 		
@@ -797,20 +769,16 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 				if (hit) {
 					Grid [x, y] = hit.collider.gameObject as GameObject;
 					//Debug.Log ("hit at: " + x + "," + y);
-
 				}
 			}
 		}
 	}
 
-	string getTileName (Vector2 tPos)
+	public string getTileName (Vector2 tPos)
 	{
-
 		return Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)].GetComponent<MoveScript> ().getName ();
-
 	}
-
-	//******* we shouldnt be checking a cigarette for adjacent cigs *********
+		
 	bool CigsDestroyed (List<Vector2>[] matches)
 	{
 		//change this name
@@ -842,11 +810,9 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		} else {
 			Debug.Log ("Delete a cigarette");
 			foreach (Vector2 cigarette in cigsToDestroy) {
-				DestroyTile (cigarette);
+				DestroyTile (cigarette, true);
 			}
 		}
-		
-
 		return dontSpawnCig;
 	}
 
@@ -858,9 +824,7 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 			for (int x = col; x < GridHeight; x++) {
 				if (Grid [x, y].GetComponent<MoveScript> ().getName () != "ciggy") {
 
-
 					CreateCigarette (new Vector2 (x, y));
-
 
 					goto Spawned;
 				}
@@ -877,32 +841,23 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 		bool firstTime = true;
 		List<Vector2>[] matches;
 
-		//update grid
-		//retrive matches
-
-		//while matches exist
-		//destroy the tiles
-		//replace the tiles
-		//update the grid
-
-
-
-
-
 		do {
 			if (!firstTime || automate)//to prevent a double wait period
 			yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
 			UpdateGridArray (); //update grid
-			matches = getMatches (); //Retrieve any new matches
+			matches = getMatches (Grid); //Retrieve any new matches
 			if (matches [0] == null)
 				break;
+
 
 			if (cigOn) {
 				if (!CigsDestroyed (matches)) {
 					//Debug.Log ("Spawn a cigarette");
+					if(firstTime)
 					SpawnCig (3, 0);
 				}
 			}
+
 
 			Debug.Log ("printing matchsets");
 			printMatchSets (matches);
@@ -911,36 +866,23 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 			ReplaceTiles ();			//Replace these tiles
 			firstTime = false;
 		} while(matches [0] != null);
-
-
-
-
-	
-
-
-
-
-
-		//PrintGrid (Grid);
+			
+		PrintGrid (Grid);
 		playerinput.currentState = GameState.None;
 
 		//if no more moves are possible then we need to reshuffle/recreate the grid
-		if (checkForPossibleMoves () == false) {
+		//also if there is a special booster we shouldnt reset the grid
+		if (checkForPossibleMoves () == false && CheckGridForSpecBooster() == false) {
 			ReplaceGrid ();
 		}
 
-
-
-	
+		Debug.Log ("Number of cigs: " + cigCount);
 	}
 
 	bool checkForPossibleMoves ()
 	{
 
-
 		//this is where we should check if there are any more available moves
-		//PrintGrid (TempGrid);
-
 		//swap with neighbour to the right
 		for (int x = 0; x <= 6; x++) {
 			for (int y = 7; y >= 0; y--) {
@@ -953,29 +895,22 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 
 
 
-				//for now, set the grid equal to the tempgrid so we can use the getmatches method, swap back straight away
-				GameObject[,] fakeGrid = Grid;
-				Grid = TempGrid;
-
-				List<Vector2>[] matches = getMatches ();
+				List<Vector2>[] matches = getMatches (TempGrid);
 				if (matches [0] != null) {
 					//Debug.Log ("Swap " + x + ":" + y + "with " + (x + 1) + ":" + y);
 
-					//now check that no fat surrounds the two tiles
-					if (NoFatExists (new Vector2 (x, y), new Vector2 (x + 1, y))) {
+					//now check that no fat surrounds the two tiles and that they arent cigarettes
+					if (NoFatExists (new Vector2 (x, y), new Vector2 (x + 1, y))
+						&& getTileName(new Vector2(x,y)) != "ciggy"
+						&& getTileName(new Vector2(x+1,y)) != "ciggy") {
 						Debug.Log ("there are potential HORIZONTAL moves");
 						DisplayMoves (Grid [x, y], Grid [x + 1, y]);
 						return true;
 					}
 				} 
-				Grid = fakeGrid;
-
-
 			}
 		}
-
-
-
+			
 		//now swap with neighbour underneath
 		for (int x = 0; x <= 7; x++) {
 			for (int y = 7; y >= 1; y--) {
@@ -986,16 +921,14 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 				TempGrid [x, y] = TempGrid [x, y - 1];
 				TempGrid [x, y - 1] = tempTile;
 
-				//for now, set the grid equal to the tempgrid so we can use the getmatches method, swap back straight away
-				GameObject[,] fakeGrid = Grid;
-
-				Grid = TempGrid;
-				List<Vector2>[] matches = getMatches ();
+				List<Vector2>[] matches = getMatches (TempGrid);
 				if (matches [0] != null) {
 					//Debug.Log ("Swap " + x + ":" + y + "with " + x + ":" + (y - 1));
 
 					//now check that no fat surrounds the two tiles
-					if (NoFatExists (new Vector2 (x, y), new Vector2 (x, y - 1))) {
+					if (NoFatExists (new Vector2 (x, y), new Vector2 (x, y - 1))
+						&& getTileName(new Vector2(x,y)) != "ciggy"
+						&& getTileName(new Vector2(x, y-1)) != "ciggy") {
 						Debug.Log ("there are potential Vertical moves");
 						DisplayMoves (Grid [x, y], Grid [x, y - 1]);
 						return true;
@@ -1003,8 +936,6 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 				} else {
 					//Debug.Log ("no more Vertical moves");
 				}
-				Grid = fakeGrid;
-
 			}
 		}
 
@@ -1040,7 +971,6 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 	}
 
 
-
 	void CopyArray (GameObject[,] from, GameObject[,] to)
 	{
 
@@ -1074,7 +1004,6 @@ This also means that, when other tiles are checking missing tiles below, cigaret
 
 public enum GameState
 {
-
 	None,
 	Animating,
 	selectionStarted

@@ -48,6 +48,9 @@ TagManager:
   - name: white
     uniqueID: 3287394629
     locked: 0
+  - name: holder
+    uniqueID: 2737046307
+    locked: 0
   - name: Icons
     uniqueID: 2448993323
     locked: 0
@@ -59,4 +62,7 @@ TagManager:
     locked: 0
   - name: Feedback
     uniqueID: 1363201315
+    locked: 0
+  - name: UI
+    uniqueID: 630416697
     locked: 0

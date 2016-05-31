@@ -22,7 +22,7 @@ public class PlayerInput : MonoBehaviour
 		movesText.text = "Moves: " + movesLeft;
 
 	}
-	
+
 	// Update is called once per frame
 	void Update ()
 	{
@@ -39,7 +39,7 @@ public class PlayerInput : MonoBehaviour
 
 
 				if (activeTile != null) {
-					StartCoroutine (AttemptMove ());
+					AttemptMove ();
 				}
 			} else if (Input.GetKeyUp (KeyCode.Mouse0)) {
 				activeTile = null;
@@ -49,7 +49,7 @@ public class PlayerInput : MonoBehaviour
 				gm.SpaceBarFunction ();
 			}
 		}
-	
+
 	}
 
 	void SelectTile ()
@@ -58,16 +58,28 @@ public class PlayerInput : MonoBehaviour
 		RaycastHit2D hit = Physics2D.Raycast (rayPos, Vector2.zero, 0f);
 		//Debug.Log ("hit: " + hit);
 		if (hit) {	
-			
+
 			//Debug.Log ("hit tile");
 			activeTile = hit.collider.gameObject;
+
+			if (activeTile.GetComponent<MoveScript> ().getName () == "beer") {
+				//swap with a cigarette and display feedback
+				gm.CreateCigarette(activeTile.transform.position);
+				gm.UpdateGridArray ();
+				gm.DisplayFeedback (1);
+				activeTile = null;
+			} else if (activeTile.GetComponent<MoveScript> ().getName () == "ciggy") {
+				//freeze screen for 3 seconds and display feedback
+				gm.DisplayFeedback (2);
+				activeTile = null;
+			}
 		}
 	}
 
 
 
 
-	IEnumerator AttemptMove ()
+	void AttemptMove ()
 	{
 
 
@@ -86,43 +98,56 @@ public class PlayerInput : MonoBehaviour
 			Vector2 tile2Pos = hit.collider.gameObject.transform.position;
 
 			//if statement stops from switching tiles that are surrounded in fat
-			if (gm.NoFatExists (new Vector2 (tile1Pos.x,tile1Pos.y), new Vector2 (tile2Pos.x,tile2Pos.y))
-				&& gm.getTileName(tile1Pos) != "ciggy" && gm.getTileName(tile2Pos) != "ciggy") {
-			
+			if (gm.NoFatExists (new Vector2 (tile1Pos.x, tile1Pos.y), new Vector2 (tile2Pos.x, tile2Pos.y))
+			    && gm.getTileName (tile1Pos) != "ciggy" && gm.getTileName (tile2Pos) != "ciggy") {
+
 				if (NeighborCheck (tile2)) {
 					currentState = GameState.Animating;
 
 					//swap tiles
 					gm.SwapTiles (tile1, tile2);		//swap
-					yield return new WaitForSeconds (gm.swapTime);				//wait
-					gm.UpdateGridArray ();									//update
-
-					if (CheckForSpecialBooster (tile1, tile2) == false) {
-
-						//check for matches after grid has been updated
-						List<Vector2>[] matches;
-						matches = gm.getMatches (gm.Grid); //Retrieve any new matches
+					//yield return new WaitForSeconds (gm.swapTime);				//wait
+					//gm.UpdateGridArray ();									//update
 
 
-						//if no matches of atleast 3, swap tiles back
-						if (matches [0] == null) {
-					
-							gm.SwapTiles (tile1, tile2); 		//swap back
-							yield return new WaitForSeconds (gm.swapTime);				//wait
-							gm.UpdateGridArray ();									//update
-							currentState = GameState.None;
-						} else {
-							Debug.Log ("there are matches");
-							UpdateMovesLeft ();
-							StartCoroutine (gm.continousCheck ());
-						}
-
-						activeTile = null; //set to null to allow next move
-					}
-				
 				}
 			}
 		}
+	}
+
+	void FinishedSwapping (List<GameObject> tiles)
+	{
+
+		gm.UpdateGridArray ();
+
+		if (CheckForSpecialBooster (tiles [0], tiles [1]) == false) {
+			//check for matches after grid has been updated
+			List<Vector2>[] matches;
+			matches = gm.getMatches (gm.Grid); //Retrieve any new matches
+
+
+			//if no matches of atleast 3, swap tiles back
+			if (matches [0] == null) {
+				gm.SwapBack (tiles [0], tiles [1]); //swap back
+
+			} else {
+				Debug.Log ("there are matches");
+				UpdateMovesLeft ();
+				//StartCoroutine (gm.continousCheck ());
+				StartCoroutine(	gm.Check());
+			}
+
+			activeTile = null; //set to null to allow next move
+		}
+	}
+
+	void FinishedSwappingBack(){
+
+		gm.UpdateGridArray ();
+		currentState = GameState.None;
+
+		activeTile = null; //redundant
+
 	}
 
 	void UpdateMovesLeft ()
@@ -142,7 +167,7 @@ public class PlayerInput : MonoBehaviour
 		if (tile1.GetComponent<MoveScript> ().getName () == "water") {
 			gm.Grid [Mathf.RoundToInt (tile1.transform.position.x), Mathf.RoundToInt (tile1.transform.position.y)] = null;
 
-			StartCoroutine (gm.DestroyTilesWithName (tile2.GetComponent<MoveScript> ().getName ()));
+			StartCoroutine( gm.DestroyTilesWithName (tile2.GetComponent<MoveScript> ().getName ()));
 			Destroy (tile1);
 			UpdateMovesLeft ();
 			activeTile = null;
@@ -151,12 +176,13 @@ public class PlayerInput : MonoBehaviour
 		} else if (tile2.GetComponent<MoveScript> ().getName () == "water") {
 			gm.Grid [Mathf.RoundToInt (tile2.transform.position.x), Mathf.RoundToInt (tile2.transform.position.y)] = null;
 
-			StartCoroutine (gm.DestroyTilesWithName (tile1.GetComponent<MoveScript> ().getName ()));
+			StartCoroutine( gm.DestroyTilesWithName (tile1.GetComponent<MoveScript> ().getName ()));
 			Destroy (tile2);
 			UpdateMovesLeft ();
 			activeTile = null;
 			return true;
 		} else {
+			
 			return false;
 		}
 	}
@@ -171,7 +197,7 @@ public class PlayerInput : MonoBehaviour
 
 		if (xDiff + yDiff == 1) {
 			return true;
-		
+
 		} else {
 			return false;
 		}

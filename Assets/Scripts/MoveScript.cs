@@ -10,25 +10,14 @@ public class MoveScript : MonoBehaviour {
 	float decrease = 0.1f;
 	public bool isBooster = false;
 	public bool isSpecialBooster = false;
+	public bool isIngredient = false;
 	public int tileIndex;
 
 	void Awake(){
 
 		gm = GameObject.Find ("GameController").GetComponent<GridManager> ();
 	}
-
-	public void Move(Vector2 destination){
-
-		//Debug.Log ("Tried to change pos");
-
-
-		iTween.MoveTo (gameObject, iTween.Hash("x", destination.x, "y", destination.y, "time", 1.0f, "onComplete", "printCompleted"));
-
-
-
-
-		//gameObject.transform.position = destination;
-	}
+		
 
 	public void changeColor(Color c){
 
@@ -47,7 +36,7 @@ public class MoveScript : MonoBehaviour {
 
 
 	//each tile checks how many spots are empty below and moves down that many spot
-	public void GravityCheck(){
+	public void GravityCheck(bool lastile){
 		
 		//when tiles are moved we want to stop them from flashing
 		StopFlashing ();
@@ -64,8 +53,16 @@ public class MoveScript : MonoBehaviour {
 
 		}
 
+
+
+
 		if (missingTileCount > 0) {
-			iTween.MoveTo (gameObject, iTween.Hash( "y", Mathf.RoundToInt(transform.position.y) - missingTileCount, "x", transform.position.x, "time", gm.dropTime));
+			if (lastile) {
+				Debug.Log ("Last tile---------------------------");
+				iTween.MoveTo (gameObject, iTween.Hash ("y", Mathf.RoundToInt (transform.position.y) - missingTileCount, "x", transform.position.x, "time", gm.dropTime, "oncomplete", "LastTileFinished", "oncompletetarget", GameObject.Find ("GameController")));
+			} else {
+				iTween.MoveTo (gameObject, iTween.Hash ("y", Mathf.RoundToInt (transform.position.y) - missingTileCount, "x", transform.position.x, "time", gm.dropTime));
+			}
 		}
 
 	}

@@ -19,9 +19,10 @@ public class PlayerInput : MonoBehaviour
 	{
 		gm = gameObject.GetComponent<GridManager> ();
 		movesLeft = 20;
-		movesText.text = "Moves: " + movesLeft;
+		UpdateMovesLeft ();
 
 	}
+
 
 	// Update is called once per frame
 	void Update ()
@@ -103,7 +104,7 @@ public class PlayerInput : MonoBehaviour
 
 				if (NeighborCheck (tile2)) {
 					currentState = GameState.Animating;
-
+					gm.cigSpawnAllowed = true;
 					//swap tiles
 					gm.SwapTiles (tile1, tile2);		//swap
 					//yield return new WaitForSeconds (gm.swapTime);				//wait
@@ -114,11 +115,34 @@ public class PlayerInput : MonoBehaviour
 			}
 		}
 	}
+	void MoveUp(GameObject tile){
+		Debug.Log ("moving uppppp");
+		//Vector2 [] path = new Vector2[3];
+		//path[0] = new Vector2 (4,4);
+	//	path [1] = new Vector2(7,7);
+
+
+		iTween.MoveTo (tile, iTween.Hash ("x", tile.transform.position.x, "y",7, "time", 1));
+	}
+
+	void Grow(GameObject tile){
+
+		iTween.ScaleTo (tile, iTween.Hash("y",3, "x",3, "time", 2, "oncomplete", "MoveUp", "oncompletetarget", GameObject.Find("GameController"), "oncompleteparams", tile));
+	}
 
 	void FinishedSwapping (List<GameObject> tiles)
 	{
 
 		gm.UpdateGridArray ();
+
+		if (AreNormalBoosters (tiles [0], tiles [1])) {
+			Debug.Log ("Let me knowwww");
+			//grow(tile1)
+			for(int i = 0; i < 7; i++){
+				Grow (tiles[0]);
+			}
+			//move(tile1)
+		}
 
 		if (CheckForSpecialBooster (tiles [0], tiles [1]) == false) {
 			//check for matches after grid has been updated
@@ -132,12 +156,24 @@ public class PlayerInput : MonoBehaviour
 
 			} else {
 				Debug.Log ("there are matches");
+				if (movesLeft > 0)
+					movesLeft--;
 				UpdateMovesLeft ();
 				//StartCoroutine (gm.continousCheck ());
 				StartCoroutine(	gm.Check());
 			}
 
 			activeTile = null; //set to null to allow next move
+		}
+	
+	}
+
+	bool AreNormalBoosters (GameObject tile1, GameObject tile2){
+
+		if (tile1.GetComponent<MoveScript> ().isBooster && tile2.GetComponent<MoveScript> ().isBooster) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -153,9 +189,8 @@ public class PlayerInput : MonoBehaviour
 	void UpdateMovesLeft ()
 	{
 
-		if (movesLeft > 0)
-			movesLeft--;
-		movesText.text = "Moves: " + movesLeft;
+
+		movesText.text = "MOVES\n" + movesLeft;
 
 
 	}

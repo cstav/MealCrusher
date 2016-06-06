@@ -4,7 +4,7 @@ using System.Collections;
 public class Sounds : MonoBehaviour {
 
 	AudioSource audiosource;
-	public AudioClip smoke;
+	public AudioClip[] sounds;
 	// Use this for initialization
 	void Start () {
 	
@@ -12,9 +12,14 @@ public class Sounds : MonoBehaviour {
 	}
 
 
-	public void PlaySound(){
+	public void PlaySound(string sound){
 
-		audiosource.PlayOneShot (smoke);
+		if (sound == "smoke") {
+			audiosource.PlayOneShot (sounds [0]);
+		} else if (sound == "swoosh") {
+			audiosource.PlayOneShot (sounds [1]);
+		}
+		//audiosource.PlayOneShot (smoke);
 	}
 	
 	// Update is called once per frame

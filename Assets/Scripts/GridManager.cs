@@ -30,9 +30,9 @@ public class GridManager : MonoBehaviour
 	List<Vector3> holderPositions;
 	int fatLeft = 0;
 	//to toggle fat blocks on and off
-	bool fatOn = false;
+	bool fatOn = true;
 	//to toggle ciggarettes on and off
-	bool cigOn = false;
+	bool cigOn = true;
 	//toggle clearing ingredients level
 	bool ingredientsOn = true;
 	//for the game to play by itself
@@ -41,7 +41,7 @@ public class GridManager : MonoBehaviour
 	public GameObject explosion;
 	//number of cigarettes on the grid at a given time
 	int cigCount = 0;
-	bool cigSpawnAllowed = true;
+	public bool cigSpawnAllowed = false;
 
 
 	//two tiles that were last swapped
@@ -70,7 +70,7 @@ public class GridManager : MonoBehaviour
 		sounds = Camera.main.GetComponent<Sounds> ();
 
 		source = gameObject.GetComponent<AudioSource> ();
-		tileColours = new string[7];
+		tileColours = new string[11];
 		tileColours [0] = "beer";
 		tileColours [1] = "strawberry";
 		tileColours [2] = "cutlet";
@@ -78,6 +78,11 @@ public class GridManager : MonoBehaviour
 		tileColours [4] = "milk";
 		tileColours [5] = "pepper";
 		tileColours [6] = "ciggy";
+		tileColours [7] = "raspberry";
+		tileColours [8] = "aubergine";
+		tileColours [9] = "broccoli";
+		tileColours [10] = "carrot";
+
 
 		if (Application.loadedLevel == 2) {
 			StartCoroutine (CreateGridTest ());
@@ -93,10 +98,12 @@ public class GridManager : MonoBehaviour
 	{
 
 		holderPositions = new List<Vector3> ();
+		float y = -1.3f;
+		int startpos = 2;
 
-		for (int x = 0; x < amount; x++) {
-			Instantiate (ingredientHolder, new Vector2 (x, -1), Quaternion.identity);
-			holderPositions.Add (new Vector3 (x, -1, 0)); //z =0 indicates that holder is unoccupied
+		for (int x = startpos; x < amount + startpos; x++) {
+			Instantiate (ingredientHolder, new Vector2 (x, y), Quaternion.identity);
+			holderPositions.Add (new Vector3 (x, y, 0)); //z =0 indicates that holder is unoccupied
 		}
 	}
 
@@ -125,7 +132,8 @@ public class GridManager : MonoBehaviour
 				//move to pos with iTween
 				Debug.Log ("Moving ingredient");
 
-
+				sounds.PlaySound ("swoosh");
+				ingredient.GetComponent<MoveScript> ().StopFlashing ();
 
 				iTween.MoveTo (ingredient, iTween.Hash ("x", holderPositions [i].x, "y", holderPositions [i].y, "time", swapTime, "oncomplete", "FinishedMovingIntoHolder", "oncompletetarget", gameObject));
 
@@ -197,14 +205,14 @@ public class GridManager : MonoBehaviour
 
 		int[,] fatPositions = {
 
-			{ 0, 0, 0, 0, 0, 0, 0, 0 },
-			{ 0, 0, 0, 0, 0, 0, 0, 0 },
-			{ 0, 0, 1, 1, 1, 1, 0, 0 },
-			{ 0, 0, 1, 1, 1, 1, 0, 0 },
-			{ 0, 0, 1, 1, 1, 1, 0, 0 },
-			{ 0, 0, 1, 1, 1, 1, 0, 0 },
-			{ 0, 0, 0, 0, 0, 0, 0, 0 },
-			{ 0, 0, 0, 0, 0, 0, 0, 0 }
+			{ 0, 0, 0, 0, 1, 1, 0, 0 },
+			{ 0, 0, 0, 0, 1, 1, 0, 0 },
+			{ 0, 0, 0, 0, 1, 1, 0, 0 },
+			{ 0, 0, 0, 0, 1, 1, 0, 0 },
+			{ 0, 0, 0, 0, 1, 1, 0, 0 },
+			{ 0, 0, 0, 0, 1, 1, 0, 0 },
+			{ 0, 0, 0, 0, 1, 1, 0, 0 },
+			{ 0, 0, 0, 0, 1, 1, 0, 0 }
 		};
 
 
@@ -369,6 +377,17 @@ public class GridManager : MonoBehaviour
 			{ 2, 0, 5, 0, 0, 5, 2, 4 }
 		}; 
 
+		//Ultimate test
+		int[,] testGrid11 = {{ 2, 8, 6, 5, 1, 1, 2, 1 },
+							{ 2, 1, 6, 9, 5, 5, 1, 2 },
+							{ 1, 2, 6, 2, 2, 0, 5, 5 },
+							{ 1, 4, 6, 0, 1, 2, 4, 4 },
+							{ 4, 1, 6, 3, 1, 0, 4, 2 },
+							{ 1, 7, 6, 3, 10, 1, 2, 4 },
+							{ 4, 2, 6, 2, 2, 1, 4, 2 },
+							{ 4, 3, 6, 3, 2, 0, 4, 1 }
+							}; 
+
 		playerinput.currentState = GameState.Animating;
 		Grid = new GameObject[GridWidth, GridHeight];
 
@@ -378,9 +397,9 @@ public class GridManager : MonoBehaviour
 				//change this back later----------------------------------------------
 				int randomTile;
 				if (Application.loadedLevel == 1) {
-					randomTile = testGrid10 [x, y];
+					randomTile = testGrid11[x, y];
 				} else {
-					randomTile = testGrid2 [x, y];
+					randomTile = testGrid8 [x, y];
 				}
 
 				if (randomTile == 6) {
@@ -390,7 +409,7 @@ public class GridManager : MonoBehaviour
 				tile.GetComponent<MoveScript> ().tileIndex = randomTile;
 
 				//if pepper will make an ingredient
-				if (randomTile == 5) {
+				if (randomTile >=7) {
 					tile.GetComponent<MoveScript> ().isIngredient = true;
 				}
 				Grid [x, y] = tile;
@@ -724,7 +743,8 @@ public class GridManager : MonoBehaviour
 		if (cigOn) {
 			if (!CigsDestroyed (matchSets)) {
 				//Debug.Log ("Spawn a cigarette");
-				SpawnCig (3, 0);
+					
+					SpawnCig (3, 0);
 			}
 		}
 
@@ -795,7 +815,7 @@ public class GridManager : MonoBehaviour
 		cigCount++;
 		tile.GetComponent<MoveScript> ().setName ("ciggy");
 		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
-		sounds.PlaySound ();
+		sounds.PlaySound ("smoke");
 	}
 
 	public void SwapTiles (GameObject tile1, GameObject tile2)
@@ -869,11 +889,11 @@ public class GridManager : MonoBehaviour
 
 			//instantiate new tiles
 			for (int i = 0; i < missingTileCount; i++) {
-				int randomTileID = Random.Range (0, TilePrefabs.Length - 1);
+				int randomTileID = Random.Range (0, TilePrefabs.Length - 5);
 				GameObject tile = Instantiate (TilePrefabs [randomTileID], new Vector2 (x, GridHeight + i), Quaternion.identity) as GameObject;
 				tile.GetComponent<MoveScript> ().setName (tileColours [randomTileID]);
 				tile.GetComponent<MoveScript> ().tileIndex = randomTileID;
-				if (randomTileID == 5) {
+				if (randomTileID >= 7) {
 					tile.GetComponent<MoveScript> ().isIngredient = true;
 				}
 				newTiles.Add (tile);
@@ -1006,11 +1026,15 @@ public class GridManager : MonoBehaviour
 
 		if (cigOn) {
 			if (!CigsDestroyed (matches)) {
+				if (cigSpawnAllowed) {	
 					SpawnCig (3, 0);
+
+				}
 			}
 		}
 
-
+		//allow for only one cigspawn per tile move
+		cigSpawnAllowed = false;
 		DestroyTiles (matches);
 		//wait for explosion effect
 		yield return new WaitForSeconds(0.2f);

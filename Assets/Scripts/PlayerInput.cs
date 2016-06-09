@@ -7,24 +7,24 @@ public class PlayerInput : MonoBehaviour
 {
 
 	GridManager gm;
+	Sounds sounds;
 	public LayerMask Tiles;
 	private GameObject activeTile;
 	public GameState currentState;
+	public BoosterState bs;
 	public Text movesText;
 	int movesLeft;
 
-
-	// Use this for initialization
 	void Start ()
 	{
+		bs = BoosterState.dontDestroy;
 		gm = gameObject.GetComponent<GridManager> ();
+		sounds = Camera.main.GetComponent<Sounds> ();
 		movesLeft = 20;
-		UpdateMovesLeft ();
+		movesText.text = "MOVES\n" + movesLeft;
 
 	}
-
-
-	// Update is called once per frame
+		
 	void Update ()
 	{
 
@@ -65,31 +65,28 @@ public class PlayerInput : MonoBehaviour
 
 			if (activeTile.GetComponent<MoveScript> ().getName () == "beer") {
 				//swap with a cigarette and display feedback
-				gm.CreateCigarette(activeTile.transform.position);
+				gm.CreateCigarette (activeTile.transform.position);
 				gm.UpdateGridArray ();
 				gm.DisplayFeedback (1);
 				activeTile = null;
+
+				//if we replace a beer with a cigarette that was the last potential swap we need to check for possible moves again
+				if (!gm.checkForPossibleMoves ()) {
+					gm.ReplaceGrid ();
+				}
 			} else if (activeTile.GetComponent<MoveScript> ().getName () == "ciggy") {
 				//freeze screen for 3 seconds and display feedback
+				sounds.PlaySound ("stayaway");
 				gm.DisplayFeedback (2);
 				activeTile = null;
 			}
 		}
 	}
-
-
-
-
+		
 	void AttemptMove ()
 	{
-
-
-
-		//Debug.Log ("attempted move");
 		Vector2 tilePos = new Vector2 (Camera.main.ScreenToWorldPoint (Input.mousePosition).x, Camera.main.ScreenToWorldPoint (Input.mousePosition).y);
 		RaycastHit2D hit = Physics2D.Raycast (tilePos, Vector2.zero, 0f);
-
-
 
 		if (hit) {
 
@@ -107,69 +104,134 @@ public class PlayerInput : MonoBehaviour
 					gm.cigSpawnAllowed = true;
 					//swap tiles
 					gm.SwapTiles (tile1, tile2);		//swap
-					//yield return new WaitForSeconds (gm.swapTime);				//wait
-					//gm.UpdateGridArray ();									//update
-
-
 				}
 			}
 		}
 	}
-	void MoveUp(GameObject tile){
-		Debug.Log ("moving uppppp");
-		//Vector2 [] path = new Vector2[3];
-		//path[0] = new Vector2 (4,4);
-	//	path [1] = new Vector2(7,7);
 
-
-		iTween.MoveTo (tile, iTween.Hash ("x", tile.transform.position.x, "y",7, "time", 1));
+	void FinishBoosterAnimation (GameObject tile)
+	{
+		Destroy (tile);
+		bs = BoosterState.dontDestroy;
+		gm.ReplaceTiles ();
 	}
 
-	void Grow(GameObject tile){
+	void MoveLeft (Hashtable values)
+	{
+		//Debug.Log ("moving left");
+		GameObject tile = values ["Tile"] as GameObject;
+		iTween.MoveBy (tile, iTween.Hash ("y", 5, "time", 0.8f, "oncomplete", "FinishBoosterAnimation", "oncompletetarget", GameObject.Find ("GameController"), "oncompleteparams", tile));
+	}
 
-		iTween.ScaleTo (tile, iTween.Hash("y",3, "x",3, "time", 2, "oncomplete", "MoveUp", "oncompletetarget", GameObject.Find("GameController"), "oncompleteparams", tile));
+	void MoveRight (Hashtable values)
+	{
+		//Debug.Log ("moving right");
+		GameObject tile = values ["Tile"] as GameObject;
+		tile.transform.position = new Vector2 (-2, (float)values ["TileY"]);
+
+		iTween.MoveTo (tile, iTween.Hash ("x", 9, "time", 0.8f, "oncomplete", "FinishBoosterAnimation", "oncompletetarget", GameObject.Find ("GameController"), "oncompleteparams", tile));
+		sounds.PlaySound ("swoosh");
+	}
+
+	void MoveUp (Hashtable values)
+	{
+		//Debug.Log ("moving up");
+		GameObject tile = values ["Tile"] as GameObject;
+		iTween.MoveTo (tile, iTween.Hash ("y", 9, "time", 0.8f, "oncomplete", "MoveRight", "oncompletetarget", GameObject.Find ("GameController"), "oncompleteparams", values));
+		sounds.PlaySound ("swoosh");
+	}
+
+	void MoveDown (GameObject tile)
+	{
+		//Debug.Log ("moving down");
+		Hashtable values = new Hashtable ();
+		values.Add ("Tile", tile);
+		values.Add ("TileX", tile.transform.position.x);
+		values.Add ("TileY", tile.transform.position.y);
+
+		iTween.MoveTo (tile, iTween.Hash ("y", 0.66f, "time", 0.8f, "oncomplete", "MoveUp", "oncompletetarget", GameObject.Find ("GameController"), "oncompleteparams", values));
+		sounds.PlaySound ("swoosh");
+	}
+
+	void Grow (GameObject tile)
+	{
+		sounds.PlaySound ("grow");
+		iTween.ScaleTo (tile, iTween.Hash ("y", 3, "x", 3, "time", 1, "oncomplete", "MoveDown", "oncompletetarget", GameObject.Find ("GameController"), "oncompleteparams", tile));
+
 	}
 
 	void FinishedSwapping (List<GameObject> tiles)
 	{
-
+		DecrementMoves ();
 		gm.UpdateGridArray ();
 
+		//if both tiles are normal boosters
 		if (AreNormalBoosters (tiles [0], tiles [1])) {
-			Debug.Log ("Let me knowwww");
-			//grow(tile1)
-			for(int i = 0; i < 7; i++){
-				Grow (tiles[0]);
-			}
-			//move(tile1)
+			bs = BoosterState.Destroy;
+			Grow (tiles [0]);
+			gm.Grid [Mathf.RoundToInt (tiles [0].transform.position.x), Mathf.RoundToInt (tiles [0].transform.position.y)] = null;
+		} 
+
+		//if both are special boosters (waterbottles)
+		else if (AreSpecialBoosters (tiles [0], tiles [1])) {
+			gm.DestroyGridQuarter (tiles[1].transform.position);
+			gm.Invoke ("ReplaceTiles", 0.3f);
 		}
 
-		if (CheckForSpecialBooster (tiles [0], tiles [1]) == false) {
+		//if one is a special booster and the other is a normal booster
+		else if (AreSpecialAndNormalBoosters (tiles [0], tiles [1])) {
+
+			if (tiles [0].GetComponent<MoveScript> ().isBooster) {
+				gm.ReplaceWithBoosters (tiles [0].GetComponent<MoveScript> ().getName ());
+			} else {
+				gm.ReplaceWithBoosters (tiles [1].GetComponent<MoveScript> ().getName ());
+			}
+			gm.DestroyTile (tiles [0].transform.position, true);
+			gm.DestroyTile (tiles [1].transform.position, true);
+			gm.Invoke ("ReplaceTiles", 0.3f);
+		} 
+
+		//if only one is a special booster and other is regular tile
+		else if (CheckForSpecialBooster (tiles [0], tiles [1])) {
+			sounds.PlaySound ("raygun");
+			if (tiles [0].GetComponent<MoveScript> ().isSpecialBooster) {
+				StartCoroutine (gm.DestroyTilesWithName (tiles [1].GetComponent<MoveScript> ().getName ()));
+				gm.DestroyTile (tiles [0].transform.position, false);
+			} else {
+				StartCoroutine (gm.DestroyTilesWithName (tiles [0].GetComponent<MoveScript> ().getName ()));
+				gm.DestroyTile (tiles [1].transform.position, false);
+			}
+		}
+
+		//if tiles are normal
+		else {
 			//check for matches after grid has been updated
 			List<Vector2>[] matches;
 			matches = gm.getMatches (gm.Grid); //Retrieve any new matches
 
-
 			//if no matches of atleast 3, swap tiles back
 			if (matches [0] == null) {
+				activeTile = null;
 				gm.SwapBack (tiles [0], tiles [1]); //swap back
-
 			} else {
-				Debug.Log ("there are matches");
-				if (movesLeft > 0)
-					movesLeft--;
-				UpdateMovesLeft ();
-				//StartCoroutine (gm.continousCheck ());
-				StartCoroutine(	gm.Check());
+				StartCoroutine (gm.Check ());
 			}
-
-			activeTile = null; //set to null to allow next move
 		}
 	
 	}
 
-	bool AreNormalBoosters (GameObject tile1, GameObject tile2){
+	bool CheckForSpecialBooster (GameObject tile1, GameObject tile2)
+	{
+		if (tile1.GetComponent<MoveScript> ().isSpecialBooster) {
+			return true;
+		} else if (tile2.GetComponent<MoveScript> ().isSpecialBooster) {
+			return true;
+		}
+		return false;
+	}
 
+	bool AreNormalBoosters (GameObject tile1, GameObject tile2)
+	{
 		if (tile1.GetComponent<MoveScript> ().isBooster && tile2.GetComponent<MoveScript> ().isBooster) {
 			return true;
 		} else {
@@ -177,50 +239,50 @@ public class PlayerInput : MonoBehaviour
 		}
 	}
 
-	void FinishedSwappingBack(){
+	bool AreSpecialBoosters (GameObject tile1, GameObject tile2)
+	{
 
-		gm.UpdateGridArray ();
-		currentState = GameState.None;
+		if (tile1.GetComponent<MoveScript> ().isSpecialBooster && tile2.GetComponent<MoveScript> ().isSpecialBooster) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-		activeTile = null; //redundant
+	bool AreSpecialAndNormalBoosters (GameObject tile1, GameObject tile2)
+	{
+
+		if (tile1.GetComponent<MoveScript> ().isSpecialBooster && tile2.GetComponent<MoveScript> ().isBooster) {
+			return true;
+		} else if (tile1.GetComponent<MoveScript> ().isBooster && tile2.GetComponent<MoveScript> ().isSpecialBooster) {
+			return true;
+		} else {
+			return false;
+		}
 
 	}
 
-	void UpdateMovesLeft ()
+	void FinishedSwappingBack ()
 	{
 
+		//activeTile = null; //redundant
+		gm.UpdateGridArray ();
+		currentState = GameState.None;
 
+
+
+	}
+
+	void DecrementMoves ()
+	{
+		if(movesLeft > 0)
+		movesLeft--;
 		movesText.text = "MOVES\n" + movesLeft;
 
 
 	}
 
-	bool CheckForSpecialBooster (GameObject tile1, GameObject tile2)
-	{
 
-		//logic for when a swap is made with a special booster
-		if (tile1.GetComponent<MoveScript> ().getName () == "water") {
-			gm.Grid [Mathf.RoundToInt (tile1.transform.position.x), Mathf.RoundToInt (tile1.transform.position.y)] = null;
-
-			StartCoroutine( gm.DestroyTilesWithName (tile2.GetComponent<MoveScript> ().getName ()));
-			Destroy (tile1);
-			UpdateMovesLeft ();
-			activeTile = null;
-			return true;
-
-		} else if (tile2.GetComponent<MoveScript> ().getName () == "water") {
-			gm.Grid [Mathf.RoundToInt (tile2.transform.position.x), Mathf.RoundToInt (tile2.transform.position.y)] = null;
-
-			StartCoroutine( gm.DestroyTilesWithName (tile1.GetComponent<MoveScript> ().getName ()));
-			Destroy (tile2);
-			UpdateMovesLeft ();
-			activeTile = null;
-			return true;
-		} else {
-			
-			return false;
-		}
-	}
 
 	bool NeighborCheck (GameObject objectToCheck)
 	{

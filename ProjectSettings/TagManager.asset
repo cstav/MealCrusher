@@ -51,6 +51,9 @@ TagManager:
   - name: holder
     uniqueID: 2737046307
     locked: 0
+  - name: explosion
+    uniqueID: 2787042139
+    locked: 0
   - name: Icons
     uniqueID: 2448993323
     locked: 0
@@ -60,9 +63,15 @@ TagManager:
   - name: fattystuff
     uniqueID: 1105336415
     locked: 0
+  - name: burgers
+    uniqueID: 3192437771
+    locked: 0
   - name: Feedback
     uniqueID: 1363201315
     locked: 0
   - name: UI
     uniqueID: 630416697
+    locked: 0
+  - name: Lines
+    uniqueID: 3756049813
     locked: 0

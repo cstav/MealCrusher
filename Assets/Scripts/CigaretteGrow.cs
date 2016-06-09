@@ -9,7 +9,7 @@ public class CigaretteGrow : MonoBehaviour {
 	
 		anim = GetComponent<Animator> ();
 		Stop ();
-		Debug.Log ("length: " +  GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length);
+		//Debug.Log ("length: " +  GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length);
 	}
 	
 	// Update is called once per frame

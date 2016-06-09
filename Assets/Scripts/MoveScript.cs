@@ -58,7 +58,7 @@ public class MoveScript : MonoBehaviour {
 
 		if (missingTileCount > 0) {
 			if (lastile) {
-				Debug.Log ("Last tile---------------------------");
+				//Debug.Log ("Last tile---------------------------");
 				iTween.MoveTo (gameObject, iTween.Hash ("y", Mathf.RoundToInt (transform.position.y) - missingTileCount, "x", transform.position.x, "time", gm.dropTime, "oncomplete", "LastTileFinished", "oncompletetarget", GameObject.Find ("GameController")));
 			} else {
 				iTween.MoveTo (gameObject, iTween.Hash ("y", Mathf.RoundToInt (transform.position.y) - missingTileCount, "x", transform.position.x, "time", gm.dropTime));

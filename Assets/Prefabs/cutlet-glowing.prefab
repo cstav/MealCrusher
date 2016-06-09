@@ -11,6 +11,8 @@ GameObject:
   - 212: {fileID: 21278596}
   - 114: {fileID: 11430958}
   - 61: {fileID: 6144440}
+  - 50: {fileID: 5080264}
+  - 114: {fileID: 11414218}
   m_Layer: 0
   m_Name: cutlet-glowing
   m_TagString: Untagged
@@ -30,6 +32,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+--- !u!50 &5080264
+Rigidbody2D:
+  serializedVersion: 2
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 124572}
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!61 &6144440
 BoxCollider2D:
   m_ObjectHideFlags: 1
@@ -39,11 +58,22 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.6, y: 0.6}
+--- !u!114 &11414218
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 124572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6aaae5e5093784c80bbeb15af7bb7183, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &11430958
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -57,6 +87,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBooster: 0
   isSpecialBooster: 0
+  isIngredient: 0
   tileIndex: 0
 --- !u!212 &21278596
 SpriteRenderer:

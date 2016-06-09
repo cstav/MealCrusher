@@ -13,6 +13,7 @@ GameObject:
   - 61: {fileID: 6182214}
   - 95: {fileID: 9596514}
   - 114: {fileID: 11412326}
+  - 50: {fileID: 5028786}
   m_Layer: 0
   m_Name: Cigarette-icon 1
   m_TagString: Untagged
@@ -32,6 +33,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+--- !u!50 &5028786
+Rigidbody2D:
+  serializedVersion: 2
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 110820}
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!61 &6182214
 BoxCollider2D:
   m_ObjectHideFlags: 1
@@ -87,6 +105,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBooster: 0
   isSpecialBooster: 0
+  isIngredient: 0
   tileIndex: 0
 --- !u!212 &21277326
 SpriteRenderer:

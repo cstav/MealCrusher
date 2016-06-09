@@ -8,6 +8,7 @@ public class PlayerInput : MonoBehaviour
 
 	GridManager gm;
 	Sounds sounds;
+	ScoreHandler scorehandler;
 	public LayerMask Tiles;
 	private GameObject activeTile;
 	public GameState currentState;
@@ -17,6 +18,7 @@ public class PlayerInput : MonoBehaviour
 
 	void Start ()
 	{
+		scorehandler = GameObject.Find ("scoretext").GetComponent<ScoreHandler> ();
 		bs = BoosterState.dontDestroy;
 		gm = gameObject.GetComponent<GridManager> ();
 		sounds = Camera.main.GetComponent<Sounds> ();
@@ -24,6 +26,7 @@ public class PlayerInput : MonoBehaviour
 		movesText.text = "MOVES\n" + movesLeft;
 
 	}
+
 		
 	void Update ()
 	{
@@ -111,6 +114,7 @@ public class PlayerInput : MonoBehaviour
 
 	void FinishBoosterAnimation (GameObject tile)
 	{
+		scorehandler.AddPoints (5000);
 		Destroy (tile);
 		bs = BoosterState.dontDestroy;
 		gm.ReplaceTiles ();
@@ -156,7 +160,7 @@ public class PlayerInput : MonoBehaviour
 	void Grow (GameObject tile)
 	{
 		sounds.PlaySound ("grow");
-		iTween.ScaleTo (tile, iTween.Hash ("y", 3, "x", 3, "time", 1, "oncomplete", "MoveDown", "oncompletetarget", GameObject.Find ("GameController"), "oncompleteparams", tile));
+		iTween.ScaleTo (tile, iTween.Hash ("y", 0.4, "x", 0.4f, "time", 1, "oncomplete", "MoveDown", "oncompletetarget", GameObject.Find ("GameController"), "oncompleteparams", tile));
 
 	}
 
@@ -189,6 +193,7 @@ public class PlayerInput : MonoBehaviour
 			gm.DestroyTile (tiles [0].transform.position, true);
 			gm.DestroyTile (tiles [1].transform.position, true);
 			gm.Invoke ("ReplaceTiles", 0.3f);
+			scorehandler.AddPoints (1500);
 		} 
 
 		//if only one is a special booster and other is regular tile

@@ -71,18 +71,18 @@ public class GridManager : MonoBehaviour
 		playerinput = GameObject.Find ("GameController").GetComponent<PlayerInput> ();
 		sounds = Camera.main.GetComponent<Sounds> ();
 
-		tileColours = new string[10];
-		tileColours [0] = "beer";
-		tileColours [1] = "strawberry";
-		tileColours [2] = "cutlet";
-		tileColours [3] = "milk";
-		tileColours [4] = "pepper";
-		tileColours [5] = "ciggy";
-		tileColours [6] = "raspberry";
-		tileColours [7] = "aubergine";
-		tileColours [8] = "broccoli";
-		tileColours [9] = "carrot";
-
+		tileColours = new string[11];
+		tileColours [0] = "strawberry";
+		tileColours [1] = "fish";
+		tileColours [2] = "cheese";
+		tileColours [3] = "carrot";
+		tileColours [4] = "bread";
+		tileColours [5] = "raspberry";
+		tileColours [6] = "aubergine";
+		tileColours [7] = "broccoli";
+		tileColours [8] = "watermelon";
+		tileColours [9] = "beer";
+		tileColours [10] = "ciggy";
 
 		List<Vector2> cigPositions = new List<Vector2> ();
 		for (int x = 0; x < GridWidth; x++) {
@@ -298,6 +298,45 @@ public class GridManager : MonoBehaviour
 
 	}
 
+	IEnumerator CreateRandomGrid(List<Vector2> cigPositions){
+
+		playerinput.currentState = GameState.Animating;
+		Grid = new GameObject[GridWidth, GridHeight];
+
+		for (int y = GridHeight - 1; y >= 0; y--) {
+			for (int x = 0; x < GridWidth; x++) {
+
+
+				if (cigPositions.Contains (new Vector2 (x, y))) {
+					CreateCigarette (new Vector2 (x, y));
+				} else {
+
+					//change this back later----------------------------------------------
+					int randomTile = Random.Range(1, 5);
+
+					GameObject tile = Instantiate (TilePrefabs [randomTile], new Vector2 (x, y), Quaternion.identity) as GameObject;
+					tile.GetComponent<MoveScript> ().tileIndex = randomTile;
+
+					//if pepper will make an ingredient
+					if (randomTile >= 6) {
+						tile.GetComponent<MoveScript> ().isIngredient = true;
+					}
+					Grid [x, y] = tile;
+
+					//Assign the tile a name
+					Grid [x, y].GetComponent<MoveScript> ().setName (tileColours [randomTile]);
+
+				}
+
+
+				yield return new WaitForSeconds (.02f);
+			}
+		}
+
+		//StartCoroutine (continousCheck ());
+		StartCoroutine (Check ());
+	}
+
 	IEnumerator CreateGridTest (List<Vector2> cigPositions)
 	{
 
@@ -420,15 +459,15 @@ public class GridManager : MonoBehaviour
 		}; 
 
 		//Ultimate test
-		int[,] testGrid11 = {{ 2, 7, 0, 4, 1, 1, 3, 2 },
-			{ 2, 1, 0, 8, 4, 4, 3, 2 },
-			{ 1, 2, 0, 2, 2, 0, 2, 3 },
-			{ 1, 3, 0, 0, 1, 2, 3, 2 },
-			{ 3, 1, 0, 3, 1, 0, 3, 2 },
-			{ 1, 6, 0, 3, 9, 1, 2, 3 },
-			{ 3, 2, 0, 2, 2, 1, 3, 2 },
-			{ 3, 3, 0, 3, 2, 0, 3, 2 }
-		}; 
+		int[,] testGrid11 = {{ 2, 8, 0, 4, 1, 1, 3, 0 },
+							{ 2, 4, 1, 8, 4, 4, 3, 0 },
+							{ 1, 2, 9, 2, 2, 0, 0, 3 },
+							{ 1, 7, 9, 0, 1, 2, 3, 0 },
+							{ 3, 1, 9, 3, 1, 0, 3, 1 },
+							{ 1, 6, 9, 3, 9, 1, 2, 3 },
+							{ 3, 2, 5, 2, 2, 1, 3, 0 },
+							{ 3, 4, 2, 3, 0, 0, 3, 0 }
+						}; 
 
 		//2 4's at once
 		int[,] testGrid12 = {{ 4, 5, 6, 4, 2, 3, 0, 3 },
@@ -441,6 +480,17 @@ public class GridManager : MonoBehaviour
 			{ 2, 0, 5, 5, 0, 5, 2, 4 }
 		}; 
 
+		//Ultimate test
+		int[,] testGrid13 = {{ 2, 8, 0, 4, 1, 1, 3, 0 },
+							{ 2, 4, 1, 8, 4, 4, 3, 0 },
+							{ 1, 2, 9, 2, 2, 0, 0, 3 },
+							{ 1, 7, 9, 0, 1, 2, 3, 0 },
+							{ 3, 1, 9, 3, 1, 0, 3, 0 },
+							{ 1, 6, 9, 3, 9, 1, 0, 3 },
+							{ 3, 2, 5, 2, 2, 1, 3, 0 },
+							{ 3, 4, 2, 3, 0, 0, 3, 0 }
+						}; 
+
 		playerinput.currentState = GameState.Animating;
 		Grid = new GameObject[GridWidth, GridHeight];
 
@@ -450,20 +500,21 @@ public class GridManager : MonoBehaviour
 
 				if (cigPositions.Contains (new Vector2 (x, y))) {
 					CreateCigarette (new Vector2 (x, y));
-				} else {
+				}
+				else {
 
 					//change this back later----------------------------------------------
 					int randomTile;
 					if (Application.loadedLevel == 1) {
 						randomTile = testGrid11 [x, y];
 					} else {
-						randomTile = testGrid8 [x, y];
+						randomTile = testGrid13 [x, y];
 					}
 					GameObject tile = Instantiate (TilePrefabs [randomTile], new Vector2 (x, y), Quaternion.identity) as GameObject;
 					tile.GetComponent<MoveScript> ().tileIndex = randomTile;
 
 					//if pepper will make an ingredient
-					if (randomTile >= 6) {
+					if (randomTile >= 5 && randomTile <= 8) {
 						tile.GetComponent<MoveScript> ().isIngredient = true;
 					}
 					Grid [x, y] = tile;
@@ -502,9 +553,25 @@ public class GridManager : MonoBehaviour
 		return cigPositions;
 	}
 
+	List<Vector2> GetIngredientPositions ()
+	{
+
+		List<Vector2> ingPositions = new List<Vector2> ();
+		for (int y = GridHeight - 1; y >= 0; y--) {
+			for (int x = 0; x < GridWidth; x++) {
+				if (Grid [x, y].GetComponent<MoveScript> ().isIngredient) {
+					ingPositions.Add (Grid [x, y].transform.position);
+				}
+			}
+		}
+		return ingPositions;
+	}
+
 	public void ReplaceGrid ()
 	{
 		List<Vector2> cigPositions = GetCigarettePositions ();
+		List<Vector2> ingPositions = GetIngredientPositions ();
+
 
 		for (int y = GridHeight - 1; y >= 0; y--) {
 			for (int x = 0; x < GridWidth; x++) {
@@ -873,6 +940,7 @@ public class GridManager : MonoBehaviour
 
 	public void DestroyGridQuarter (Vector2 tPos)
 	{
+		scorehandler.AddPoints (1000);
 
 		int posX = Mathf.RoundToInt (tPos.x);
 		int posY = Mathf.RoundToInt (tPos.y);
@@ -929,19 +997,23 @@ public class GridManager : MonoBehaviour
 
 	public void CreateNormalBooster (Vector2 tPos)
 	{
-		sounds.PlaySound ("booster");
-		DisplayFeedback (0);
+		//we have to fix this issue at some stage---------------------------------------------------------------------------------
+		if (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] != null) {
 
-		//sometimes tile can be part of a 3 match and a 4 match and couldve already been deleted in the 3 match
-		int tileType = (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]).GetComponent<MoveScript> ().tileIndex;
+			sounds.PlaySound ("booster");
+			DisplayFeedback (0);
 
-		DestroyTile (new Vector2 (tPos.x, tPos.y), true);
-		//Destroy (Grid [Mathf.RoundToInt(tPos.x),Mathf.RoundToInt(tPos.y)]);
-		GameObject tile = Instantiate (boosterPrefabs [tileType], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
-		tile.GetComponent<MoveScript> ().setName (tileColours [tileType]);
-		tile.GetComponent<MoveScript> ().isBooster = true;
-		tile.GetComponent<MoveScript> ().tileIndex = tileType;
-		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
+			//sometimes tile can be part of a 3 match and a 4 match and couldve already been deleted in the 3 match
+			int tileType = (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]).GetComponent<MoveScript> ().tileIndex;
+
+			DestroyTile (new Vector2 (tPos.x, tPos.y), true);
+			//Destroy (Grid [Mathf.RoundToInt(tPos.x),Mathf.RoundToInt(tPos.y)]);
+			GameObject tile = Instantiate (boosterPrefabs [tileType], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
+			tile.GetComponent<MoveScript> ().setName (tileColours [tileType]);
+			tile.GetComponent<MoveScript> ().isBooster = true;
+			tile.GetComponent<MoveScript> ().tileIndex = tileType;
+			Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
+		}
 	}
 
 	public void CreateSpecialBooster (Vector2 tPos)
@@ -950,7 +1022,7 @@ public class GridManager : MonoBehaviour
 		DisplayFeedback (0);
 		DestroyTile (new Vector2 (tPos.x, tPos.y), true);
 		//Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
-		GameObject tile = Instantiate (boosterPrefabs [6], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
+		GameObject tile = Instantiate (boosterPrefabs [5], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
 		tile.GetComponent<MoveScript> ().setName ("water");
 		tile.GetComponent<MoveScript> ().isSpecialBooster = true;
 		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
@@ -960,7 +1032,7 @@ public class GridManager : MonoBehaviour
 	{
 		DestroyTile (new Vector2 (tPos.x, tPos.y), false);
 		//Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
-		GameObject tile = Instantiate (TilePrefabs [5], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
+		GameObject tile = Instantiate (TilePrefabs [10], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
 		cigCount++;
 		tile.GetComponent<MoveScript> ().setName ("ciggy");
 		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
@@ -1023,11 +1095,11 @@ public class GridManager : MonoBehaviour
 
 			//instantiate new tiles
 			for (int i = 0; i < missingTileCount; i++) {
-				int randomTileID = Random.Range (1, 5);
+				int randomTileID = Random.Range (0, 5);
 				GameObject tile = Instantiate (TilePrefabs [randomTileID], new Vector2 (x, GridHeight + i), Quaternion.identity) as GameObject;
 				tile.GetComponent<MoveScript> ().setName (tileColours [randomTileID]);
 				tile.GetComponent<MoveScript> ().tileIndex = randomTileID;
-				if (randomTileID >= 6) {
+				if (randomTileID >= 5 && randomTileID <= 8) {
 					tile.GetComponent<MoveScript> ().isIngredient = true;
 				}
 				newTiles.Add (tile);

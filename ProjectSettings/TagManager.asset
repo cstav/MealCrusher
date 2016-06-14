@@ -75,3 +75,6 @@ TagManager:
   - name: Lines
     uniqueID: 3756049813
     locked: 0
+  - name: Points
+    uniqueID: 3090169627
+    locked: 0

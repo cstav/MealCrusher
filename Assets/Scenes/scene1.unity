@@ -334,7 +334,7 @@ RectTransform:
   m_RootOrder: 5
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 20, y: -60}
+  m_AnchoredPosition: {x: -109.1, y: -60}
   m_SizeDelta: {x: 160, y: 20}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &518320044
@@ -739,7 +739,7 @@ RectTransform:
   m_RootOrder: 4
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 20, y: -20}
+  m_AnchoredPosition: {x: -109.1, y: -20}
   m_SizeDelta: {x: 68.4, y: 30}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &852562766
@@ -1448,6 +1448,15 @@ MonoBehaviour:
   - {fileID: 182122, guid: 9c8c20ff6847f4e7991d8adc17cdf46c, type: 2}
   - {fileID: 113858, guid: 2e149e751b3e7409996c9c12720a14b8, type: 2}
   - {fileID: 188518, guid: 2d5e71105b71d4901b623987589c0a70, type: 2}
+  scorePrefabs:
+  - {fileID: 163346, guid: 0aed0a0073a9c49f1b2e6f1d993832e8, type: 2}
+  - {fileID: 131382, guid: f5f44bf3f357d473fbf091041162197d, type: 2}
+  - {fileID: 123862, guid: d7a1e59f4675c479296746107a9427e1, type: 2}
+  - {fileID: 132008, guid: 9fc8dd4f2f9874c2ebcdcdfea2848704, type: 2}
+  - {fileID: 106372, guid: 013b998173e8140dc95e959c7293f015, type: 2}
+  - {fileID: 163552, guid: 994156bdbf8e447c383c0eaee7f0da1f, type: 2}
+  - {fileID: 144922, guid: 9f8a5c9058eac47c8af4d9f11e933e58, type: 2}
+  - {fileID: 113648, guid: 768be29287e204c899ed26fb0a1cdf64, type: 2}
   explosion: {fileID: 177612, guid: 9f947fa87a593410a91e69993a944bb2, type: 2}
   cigSpawnAllowed: 0
 --- !u!4 &1782749070

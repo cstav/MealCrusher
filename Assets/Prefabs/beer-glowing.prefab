@@ -57,6 +57,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isBooster: 0
   isSpecialBooster: 0
+  isIngredient: 0
   tileIndex: 0
 --- !u!212 &21290494
 SpriteRenderer:

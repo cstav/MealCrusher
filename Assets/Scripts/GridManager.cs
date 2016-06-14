@@ -31,7 +31,7 @@ public class GridManager : MonoBehaviour
 	//to toggle fat blocks on and off
 	bool fatOn = true;
 	//to toggle hamburgers on and off
-	bool burgerOn = true;
+	bool hotDogOn = true;
 	//to toggle ciggarettes on and off
 	bool cigOn = true;
 	//toggle clearing ingredients level
@@ -39,6 +39,7 @@ public class GridManager : MonoBehaviour
 	//for the game to play by itself
 	public bool automate = false;
 	public GameObject[] feedback;
+	public GameObject[] scorePrefabs;
 	public GameObject explosion;
 	//number of cigarettes on the grid at a given time
 	int cigCount = 0;
@@ -261,7 +262,7 @@ public class GridManager : MonoBehaviour
 					GameObject fatblock = Instantiate (fattyBlock, new Vector2 (x, y), Quaternion.identity) as GameObject;
 					fatGrid [x, y] = fatblock;
 					fatLeft++;
-					if (burgerOn) {
+					if (hotDogOn) {
 						GameObject burger = Instantiate (h, new Vector2 (x, y), Quaternion.identity) as GameObject;
 						burgerGrid [x, y] = burger;
 					}
@@ -491,6 +492,17 @@ public class GridManager : MonoBehaviour
 							{ 3, 4, 2, 3, 0, 0, 3, 0 }
 						}; 
 
+		//Ultimate test
+		int[,] testGrid14 = {{ 2, 8, 2, 4, 1, 3, 1, 0 },
+							 { 2, 4, 2, 8, 4, 3, 2, 0 },
+							 { 1, 2, 1, 3, 3, 3, 3, 3 },
+							 { 1, 7, 2, 0, 1, 3, 2, 2 },
+							 { 3, 1, 3, 3, 1, 0, 3, 1 },
+							 { 1, 6, 4, 3, 0, 1, 0, 3 },
+							 { 3, 2, 5, 2, 2, 1, 3, 0 },
+							 { 3, 4, 2, 3, 0, 0, 3, 0 }
+						}; 
+
 		playerinput.currentState = GameState.Animating;
 		Grid = new GameObject[GridWidth, GridHeight];
 
@@ -605,6 +617,8 @@ public class GridManager : MonoBehaviour
 			//only play the sound in animation and not when we are checking for possible moves
 			if (playerinput.currentState == GameState.Animating) {
 				sounds.PlaySound ("explosion");
+				scorehandler.AddPoints (1000); //this needs to be changed later------gets called twice-----------------
+				Instantiate (scorePrefabs[6], pos, Quaternion.identity);
 			}
 			return true;
 		} else {
@@ -656,16 +670,17 @@ public class GridManager : MonoBehaviour
 						matchSets [index] = new List<Vector2> ();
 						foreach (Vector2 match in matchPositions) {
 
-							if (!matchSets [index].Contains (match)) {
+							//if (!matchSets [index].Contains (match)) {
 								matchSets [index].Add (match);
-							}
+							//}
 							if (checkForBooster (match)) {
+
 								//get col and row of booster
 								List<Vector2> rowCol = getRowCol (match);
 								foreach (Vector2 item in rowCol) {
-									if (!matchSets [index].Contains (item)) {
+									//if (!matchSets [index].Contains (item)) {
 										matchSets [index].Add (item);
-									}
+									//}
 								}
 							}
 						}
@@ -685,13 +700,25 @@ public class GridManager : MonoBehaviour
 			currentName = "none";
 		}
 
-		//after scanning the whole grid we need to check if 3 or more tiles matched again..
+		//after scanning the whole grid we need to check if 3 or more tiles matched again...
 		if (matchPositions.Count >= 3) {
-			matchSets [index] = new List<Vector2> (); //create new list
 
-			//add all matches to new list
+			matchSets [index] = new List<Vector2> ();
 			foreach (Vector2 match in matchPositions) {
-				matchSets [index].Add (match);
+
+				//if (!matchSets [index].Contains (match)) {
+					matchSets [index].Add (match);
+				//}
+
+				if (checkForBooster (match)) {
+					//get col and row of booster
+					List<Vector2> rowCol = getRowCol (match);
+					foreach (Vector2 item in rowCol) {
+						//if (!matchSets [index].Contains (item)) {
+							matchSets [index].Add (item);
+						//}
+					}
+				}
 			}
 			index++; //change the index
 		}
@@ -712,17 +739,17 @@ public class GridManager : MonoBehaviour
 						foreach (Vector2 match in matchPositions) {
 
 							//ensures there are no duplicates
-							if (!matchSets [index].Contains (match)) {
+							//if (!matchSets [index].Contains (match)) {
 								matchSets [index].Add (match);
-							}
+							//}
 
 							if (checkForBooster (match)) {
 								//get col and row of booster
 								List<Vector2> rowCol = getRowCol (match);
 								foreach (Vector2 item in rowCol) {
-									if (!matchSets [index].Contains (item)) {
+									//if (!matchSets [index].Contains (item)) {
 										matchSets [index].Add (item);
-									}
+									//}
 								}
 							}
 						}
@@ -748,19 +775,18 @@ public class GridManager : MonoBehaviour
 			matchSets [index] = new List<Vector2> ();
 			foreach (Vector2 match in matchPositions) {
 
-				if (!matchSets [index].Contains (match)) {
+				//if (!matchSets [index].Contains (match)) {
 					matchSets [index].Add (match);
-				}
+				//}
 
 				if (checkForBooster (match)) {
 					//Debug.Log ("One of the tiles in the match was a booster: " + match.x + ":" + match.y);
-
 					//get col and row of booster
 					List<Vector2> rowCol = getRowCol (match);
 					foreach (Vector2 item in rowCol) {
-						if (!matchSets [index].Contains (item)) {
+					//	if (!matchSets [index].Contains (item)) {
 							matchSets [index].Add (item);
-						}
+					//	}
 					}
 				}
 			}
@@ -781,10 +807,36 @@ public class GridManager : MonoBehaviour
 		}
 	}
 
+
+	public List<Vector2>[] SortByMatchSize(List<Vector2>[] matchSets){
+
+		int n = index;
+		int k;
+		for (int m = n; m >= 0; m--) {
+			for (int i = 0; i < n - 1; i++) {
+				k = i + 1;
+				if (matchSets [i].Count < matchSets [k].Count) {
+					//swap lists in array
+					List<Vector2> temp;
+					temp = matchSets [i];
+					matchSets [i] = matchSets [k];
+					matchSets [k] = temp;
+				}
+			}
+		}
+	
+		return matchSets;
+	}
+
+
 	public void DestroyTiles (List<Vector2>[] matchSets)
 	{
+		List<Vector2> specialBoosters = new List<Vector2> ();
 
-		//printMatchSets (matchSets);
+		//we want the largest lists firsts so that we can allocate the right boosters
+		matchSets = SortByMatchSize (matchSets);
+
+		printMatchSets (matchSets);
 
 		if (matchSets [0] != null) {
 			sounds.PlaySound ("tileDestroy");
@@ -803,51 +855,71 @@ public class GridManager : MonoBehaviour
 				case 4:
 					if (tPos == lastTileMoved1 || tPos == lastTileMoved2) {
 						CreateNormalBooster (tPos);
+						specialBoosters.Add (tPos);
 						boosterAdded = true;
 					} else if (tPos == matchSets [i].ElementAt (3) && boosterAdded == false) {
 						CreateNormalBooster (tPos);
+						specialBoosters.Add (tPos);
 						boosterAdded = true; //should be redundant
 					
 					} else {
-						DestroyTile (tPos, true);	
+						if (!specialBoosters.Contains (tPos)) {
+							DestroyTile (tPos, true);
+						}
 					}
 					break;
 				case 5:
 					if (tPos == lastTileMoved1 || tPos == lastTileMoved2) {
 						CreateSpecialBooster (tPos);
+						specialBoosters.Add (tPos);
 						boosterAdded = true;
 					} else if (tPos == matchSets [i].ElementAt (4) && boosterAdded == false) {
 						CreateSpecialBooster (tPos);
+						specialBoosters.Add (tPos);
 						boosterAdded = true; //should be redundant
 					} else {
-						DestroyTile (tPos, true);	
+						if (!specialBoosters.Contains (tPos)) {
+							DestroyTile (tPos, true);	
+						}
 					}
 					break;
 				default: 
-					DestroyTile (tPos, true);	
+					if (!specialBoosters.Contains (tPos)) {
+						DestroyTile (tPos, true);
+					}
 					break;
 				}
 			}
 
 			//Award points for match
-			switch (matchSets [i].Count) {
+			int count = matchSets [i].Count;
+
+			Debug.Log ("matched: " + count);
+
+			switch (count) {
 			case 1:
 				scorehandler.AddPoints (20);
+				Instantiate (scorePrefabs[0], matchSets [i].ElementAt (count/2), Quaternion.identity);
 				break;
 			case 3:
 				scorehandler.AddPoints (100);
+				Instantiate (scorePrefabs[1], matchSets [i].ElementAt (count/2), Quaternion.identity);
 				break;
 			case 4:
 				scorehandler.AddPoints (200);
+				Instantiate (scorePrefabs[2], matchSets [i].ElementAt (count/2), Quaternion.identity);
 				break;
 			case 5:
 				scorehandler.AddPoints (500);
+				Instantiate (scorePrefabs[3], matchSets [i].ElementAt (count/2), Quaternion.identity);
 				break;
 			case 15:
 				//for a deleted row and col
-				scorehandler.AddPoints (2000);
+				//scorehandler.AddPoints (2000);
+				//Instantiate (scorePrefabs[6], matchSets [i].ElementAt (count/4), Quaternion.identity);
 				break;
 			default: 
+				Debug.Log ("Need a case for this");
 				break;
 			}
 		}
@@ -889,7 +961,7 @@ public class GridManager : MonoBehaviour
 			}
 		}
 
-		if (burgerOn) {
+		if (hotDogOn) {
 			DestroyAdjacentBurgers (matchSets);
 		}
 
@@ -926,7 +998,7 @@ public class GridManager : MonoBehaviour
 			Destroy (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]);
 			Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = null;
 
-			if (burgerOn && fatOn) {
+			if (hotDogOn && fatOn) {
 				if (burgerGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] != null) {
 					Destroy (burgerGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]);
 					burgerGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = null;
@@ -941,6 +1013,7 @@ public class GridManager : MonoBehaviour
 	public void DestroyGridQuarter (Vector2 tPos)
 	{
 		scorehandler.AddPoints (1000);
+		Instantiate (scorePrefabs[4], tPos, Quaternion.identity);
 
 		int posX = Mathf.RoundToInt (tPos.x);
 		int posY = Mathf.RoundToInt (tPos.y);
@@ -998,7 +1071,7 @@ public class GridManager : MonoBehaviour
 	public void CreateNormalBooster (Vector2 tPos)
 	{
 		//we have to fix this issue at some stage---------------------------------------------------------------------------------
-		if (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] != null) {
+		//if (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] != null) {
 
 			sounds.PlaySound ("booster");
 			DisplayFeedback (0);
@@ -1013,7 +1086,7 @@ public class GridManager : MonoBehaviour
 			tile.GetComponent<MoveScript> ().isBooster = true;
 			tile.GetComponent<MoveScript> ().tileIndex = tileType;
 			Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
-		}
+		//}
 	}
 
 	public void CreateSpecialBooster (Vector2 tPos)
@@ -1197,7 +1270,7 @@ public class GridManager : MonoBehaviour
 		//spawn a cig in the first available cel in the row
 		for (int y = row; y < GridWidth; y++) {
 			for (int x = col; x < GridHeight; x++) {
-				if (Grid [x, y].GetComponent<MoveScript> ().getName () != "ciggy" && Grid [x, y].GetComponent<MoveScript> ().isIngredient == false) {
+				if (Grid[x,y] != null && Grid [x, y].GetComponent<MoveScript> ().getName () != "ciggy" && Grid [x, y].GetComponent<MoveScript> ().isIngredient == false) {
 
 					CreateCigarette (new Vector2 (x, y));
 
@@ -1240,7 +1313,7 @@ public class GridManager : MonoBehaviour
 			}
 		}
 
-		if (burgerOn) {
+		if (hotDogOn) {
 			DestroyAdjacentBurgers (matches);
 		}
 

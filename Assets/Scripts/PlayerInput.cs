@@ -114,7 +114,7 @@ public class PlayerInput : MonoBehaviour
 
 	void FinishBoosterAnimation (GameObject tile)
 	{
-		scorehandler.AddPoints (5000);
+		//scorehandler.AddPoints (5000); put this in destroyer
 		Destroy (tile);
 		bs = BoosterState.dontDestroy;
 		gm.ReplaceTiles ();
@@ -133,7 +133,7 @@ public class PlayerInput : MonoBehaviour
 		GameObject tile = values ["Tile"] as GameObject;
 		tile.transform.position = new Vector2 (-2, (float)values ["TileY"]);
 
-		iTween.MoveTo (tile, iTween.Hash ("x", 9, "time", 0.8f, "oncomplete", "FinishBoosterAnimation", "oncompletetarget", GameObject.Find ("GameController"), "oncompleteparams", tile));
+		iTween.MoveTo (tile, iTween.Hash ("x", 9, "time", 1, "oncomplete", "FinishBoosterAnimation", "oncompletetarget", GameObject.Find ("GameController"), "oncompleteparams", tile));
 		sounds.PlaySound ("swoosh");
 	}
 
@@ -141,7 +141,7 @@ public class PlayerInput : MonoBehaviour
 	{
 		//Debug.Log ("moving up");
 		GameObject tile = values ["Tile"] as GameObject;
-		iTween.MoveTo (tile, iTween.Hash ("y", 9, "time", 0.8f, "oncomplete", "MoveRight", "oncompletetarget", GameObject.Find ("GameController"), "oncompleteparams", values));
+		iTween.MoveTo (tile, iTween.Hash ("y", 9, "time", 1f, "oncomplete", "MoveRight", "oncompletetarget", GameObject.Find ("GameController"), "oncompleteparams", values));
 		sounds.PlaySound ("swoosh");
 	}
 
@@ -153,7 +153,7 @@ public class PlayerInput : MonoBehaviour
 		values.Add ("TileX", tile.transform.position.x);
 		values.Add ("TileY", tile.transform.position.y);
 
-		iTween.MoveTo (tile, iTween.Hash ("y", 0.66f, "time", 0.8f, "oncomplete", "MoveUp", "oncompletetarget", GameObject.Find ("GameController"), "oncompleteparams", values));
+		iTween.MoveTo (tile, iTween.Hash ("y", 0.66f, "time", 1, "oncomplete", "MoveUp", "oncompletetarget", GameObject.Find ("GameController"), "oncompleteparams", values));
 		sounds.PlaySound ("swoosh");
 	}
 
@@ -194,6 +194,8 @@ public class PlayerInput : MonoBehaviour
 			gm.DestroyTile (tiles [1].transform.position, true);
 			gm.Invoke ("ReplaceTiles", 0.3f);
 			scorehandler.AddPoints (1500);
+			Instantiate (gm.scorePrefabs[6], tiles [1].transform.position, Quaternion.identity);
+
 		} 
 
 		//if only one is a special booster and other is regular tile

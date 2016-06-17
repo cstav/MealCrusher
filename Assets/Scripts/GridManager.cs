@@ -517,7 +517,7 @@ public class GridManager : MonoBehaviour
 
 					//change this back later----------------------------------------------
 					int randomTile;
-					if (Application.loadedLevel == 1) {
+					if (Application.loadedLevel == 2) {
 						randomTile = testGrid11 [x, y];
 					} else {
 						randomTile = testGrid13 [x, y];

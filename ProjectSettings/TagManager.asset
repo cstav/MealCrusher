@@ -69,12 +69,15 @@ TagManager:
   - name: Feedback
     uniqueID: 1363201315
     locked: 0
-  - name: UI
-    uniqueID: 630416697
-    locked: 0
   - name: Lines
     uniqueID: 3756049813
     locked: 0
   - name: Points
     uniqueID: 3090169627
+    locked: 0
+  - name: stones
+    uniqueID: 154634131
+    locked: 0
+  - name: UI
+    uniqueID: 630416697
     locked: 0

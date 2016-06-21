@@ -53,6 +53,7 @@ public class GridManager : MonoBehaviour
 	PlayerInput playerinput;
 	ScoreHandler scorehandler;
 	Sounds sounds;
+	LevelScript leveldata;
 
 	void Awake ()
 	{
@@ -71,6 +72,7 @@ public class GridManager : MonoBehaviour
 		scorehandler = GameObject.Find ("scoretext").GetComponent<ScoreHandler> ();
 		playerinput = GameObject.Find ("GameController").GetComponent<PlayerInput> ();
 		sounds = Camera.main.GetComponent<Sounds> ();
+		leveldata = GameObject.Find ("LevelHandler").GetComponent<LevelScript> ();
 
 		tileColours = new string[11];
 		tileColours [0] = "strawberry";
@@ -517,7 +519,7 @@ public class GridManager : MonoBehaviour
 
 					//change this back later----------------------------------------------
 					int randomTile;
-					if (Application.loadedLevel == 2) {
+					if (Application.loadedLevel == 2d) {
 						randomTile = testGrid11 [x, y];
 					} else {
 						randomTile = testGrid13 [x, y];

@@ -4,7 +4,7 @@ using System.Collections;
 public class Sounds : MonoBehaviour {
 
 	AudioSource audiosource;
-	public AudioClip[] sounds;
+	AudioClip[] sounds;
 	// Use this for initialization
 	void Awake(){
 		audiosource = gameObject.GetComponent<AudioSource> ();
@@ -13,6 +13,20 @@ public class Sounds : MonoBehaviour {
 
 	void Start () {
 	
+		sounds = new AudioClip[20];
+		sounds[0] = Resources.Load ("Sounds/ciggy") as AudioClip;
+		sounds[1] = Resources.Load ("Sounds/smoosh") as AudioClip;
+		sounds[2] = Resources.Load ("Sounds/tap") as AudioClip;
+		sounds[3] = Resources.Load ("Sounds/Swap") as AudioClip;
+		sounds[4] = Resources.Load ("Sounds/boostNorm") as AudioClip;
+		sounds[5] = Resources.Load ("Sounds/boosterSpec") as AudioClip;
+		sounds[6] = Resources.Load ("Sounds/swapback") as AudioClip;
+		sounds[7] = Resources.Load ("Sounds/explosion") as AudioClip;
+		sounds[8] = Resources.Load ("Sounds/stayaway") as AudioClip;
+		sounds[9] = Resources.Load ("Sounds/raygun") as AudioClip;
+		sounds[10] = Resources.Load ("Sounds/grow") as AudioClip;
+		sounds[11] = Resources.Load ("Sounds/tileDestroy") as AudioClip;
+
 
 	}
 		

@@ -1238,6 +1238,54 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
+--- !u!1 &1551120796
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 1551120797}
+  - 114: {fileID: 1551120798}
+  m_Layer: 0
+  m_Name: LevelHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1551120797
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1551120796}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.3199997, y: 3.5200005, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 12
+--- !u!114 &1551120798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1551120796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bac51515edd4a4d9c85daa8f71f765ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fatOn: 0
+  hotDogOn: 0
+  cigOn: 0
+  ingredientsOn: 1
+  ingredientHolders: 0
+  timeBased: 0
+  moveBased: 0
+  gridWidth: 0
+  gridHeight: 0
 --- !u!1 &1605396509
 GameObject:
   m_ObjectHideFlags: 0
@@ -1415,49 +1463,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GridWidth: 8
   GridHeight: 8
-  Tiles:
-    serializedVersion: 2
-    m_Bits: 0
-  TilePrefabs:
-  - {fileID: 109262, guid: 428d59913654c4398b45f6dcd152e12d, type: 2}
-  - {fileID: 198610, guid: 404e8dbc222ee49b389c4bc82b7dee0e, type: 2}
-  - {fileID: 143390, guid: a61c7064c70c84eae87031258068f834, type: 2}
-  - {fileID: 182000, guid: d8515c3cc59c74fc7b53d60edf0bedd2, type: 2}
-  - {fileID: 172794, guid: be030505186bc409dbc5c3d1414e3bba, type: 2}
-  - {fileID: 158124, guid: fb195bd6f35984f8abc43e016048118c, type: 2}
-  - {fileID: 115172, guid: 53369a8c423d94e4e8a298e39e0874d3, type: 2}
-  - {fileID: 178048, guid: a40ba823fc81e443281cc4ed5e7b69c7, type: 2}
-  - {fileID: 188214, guid: a372bfdc0910047788cd400025258151, type: 2}
-  - {fileID: 147152, guid: d36a20c87e38048fb8fcdc19ad8120ce, type: 2}
-  - {fileID: 110820, guid: 2d1c29dbd1b6e456baf3e983a859effb, type: 2}
-  boosterPrefabs:
-  - {fileID: 128930, guid: 7c0fac8f85eee4f72b9ec4992a950c73, type: 2}
-  - {fileID: 127224, guid: 6bcec9d5cda9a4bec95d8dec9a27482f, type: 2}
-  - {fileID: 110758, guid: 178dc747471c346e9a02659645348497, type: 2}
-  - {fileID: 176666, guid: 536f3dba2de8c429493fc1dabfffe6ae, type: 2}
-  - {fileID: 115430, guid: 69d1b17a037df42679496454ac404175, type: 2}
-  - {fileID: 134472, guid: e2c561aee2c7a470c9e294998b1bbaa2, type: 2}
   swapTime: 0.25
   dropTime: 0.8
   index: 0
-  fattyBlock: {fileID: 118286, guid: b3961cd696e434013acaa701c12b9b44, type: 2}
-  h: {fileID: 141582, guid: 3d1cd67b8974f4a5fa8ee5a0e8d43981, type: 2}
-  ingredientHolder: {fileID: 100752, guid: 6c0b1ece5c0a6406cae2c56fc3eeee36, type: 2}
   automate: 0
-  feedback:
-  - {fileID: 182122, guid: 9c8c20ff6847f4e7991d8adc17cdf46c, type: 2}
-  - {fileID: 113858, guid: 2e149e751b3e7409996c9c12720a14b8, type: 2}
-  - {fileID: 188518, guid: 2d5e71105b71d4901b623987589c0a70, type: 2}
-  scorePrefabs:
-  - {fileID: 163346, guid: 0aed0a0073a9c49f1b2e6f1d993832e8, type: 2}
-  - {fileID: 131382, guid: f5f44bf3f357d473fbf091041162197d, type: 2}
-  - {fileID: 123862, guid: d7a1e59f4675c479296746107a9427e1, type: 2}
-  - {fileID: 132008, guid: 9fc8dd4f2f9874c2ebcdcdfea2848704, type: 2}
-  - {fileID: 106372, guid: 013b998173e8140dc95e959c7293f015, type: 2}
-  - {fileID: 163552, guid: 994156bdbf8e447c383c0eaee7f0da1f, type: 2}
-  - {fileID: 144922, guid: 9f8a5c9058eac47c8af4d9f11e933e58, type: 2}
-  - {fileID: 113648, guid: 768be29287e204c899ed26fb0a1cdf64, type: 2}
-  explosion: {fileID: 177612, guid: 9f947fa87a593410a91e69993a944bb2, type: 2}
+  scorePrefabs: []
   cigSpawnAllowed: 0
 --- !u!4 &1782749070
 Transform:
@@ -1865,19 +1875,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5353e278ea9e44f88b3a7cf287e40d37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sounds:
-  - {fileID: 8300000, guid: 8eec32b1dfd4c4609a156f90caff8f2e, type: 3}
-  - {fileID: 8300000, guid: 4d946973a71874c81b2b9f460fdb3028, type: 3}
-  - {fileID: 8300000, guid: b43d102aac6b145468dcaa94a5cccae1, type: 3}
-  - {fileID: 8300000, guid: d46323e22e74e46baa241cbf48c85671, type: 3}
-  - {fileID: 8300000, guid: 52320e590bf774734a288886eba557ba, type: 3}
-  - {fileID: 8300000, guid: 2667a0a008b044e218b63df62e2be749, type: 3}
-  - {fileID: 8300000, guid: 80e397195ea2940b69ee7bdbded856a5, type: 3}
-  - {fileID: 8300000, guid: 0dcfe736485e63542b5036dc5b360032, type: 3}
-  - {fileID: 8300000, guid: a0010a1a0c474473b81729eb770c485f, type: 3}
-  - {fileID: 8300000, guid: c3cef2e67acbe44fd9a8daf027f56733, type: 3}
-  - {fileID: 8300000, guid: 4e1ff8faed12a475eba9be0e46072269, type: 3}
-  - {fileID: 8300000, guid: 81652031b64c342cc8dbc59c138d77c5, type: 3}
 --- !u!82 &2117565183
 AudioSource:
   m_ObjectHideFlags: 0

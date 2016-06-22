@@ -8,40 +8,43 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Linq;
+using System;
 
 public class GridManager : MonoBehaviour
 {
 	public int GridWidth;
 	public int GridHeight;
 	public GameObject[,] Grid;
-	public LayerMask Tiles;
-	public GameObject[] TilePrefabs;
-	public GameObject[] boosterPrefabs;
+	public int [,] gridLayout;
+	//public LayerMask Tiles;
+	GameObject[] TilePrefabs;
+	GameObject[] boosterPrefabs;
 	private string[] tileColours;
 	public float swapTime = 0.2f;
 	public float dropTime = 0.35f;
 	public int index;
 	public GameObject[,] fatGrid;
-	public GameObject[,] burgerGrid;
-	public GameObject fattyBlock;
-	public GameObject h;
-	public GameObject ingredientHolder;
+	public GameObject[,] hotdogGrid;
+	GameObject fattyBlock;
+	GameObject hotdog;
+	GameObject ingredientHolder;
 	List<Vector3> holderPositions;
 	int fatLeft = 0;
 	//to toggle fat blocks on and off
-	bool fatOn = true;
+	bool fatOn;
 	//to toggle hamburgers on and off
-	bool hotDogOn = true;
+	bool hotDogOn;
 	//to toggle ciggarettes on and off
-	bool cigOn = true;
+	bool cigOn;
 	//toggle clearing ingredients level
-	bool ingredientsOn = true;
+	bool ingredientsOn;
 	//for the game to play by itself
 	public bool automate = false;
-	public GameObject[] feedback;
+	GameObject[] feedback;
 	public GameObject[] scorePrefabs;
-	public GameObject explosion;
+	GameObject explosion;
 	//number of cigarettes on the grid at a given time
+	GameObject cigaretteTile;
 	int cigCount = 0;
 	public bool cigSpawnAllowed = false;
 
@@ -55,14 +58,32 @@ public class GridManager : MonoBehaviour
 	Sounds sounds;
 	LevelScript leveldata;
 
-	void Awake ()
+	void Start ()
 	{
+		leveldata = GameObject.Find ("LevelHandler").GetComponent<LevelScript> ();
+		this.fatOn = leveldata.fatOn;
+		this.hotDogOn = leveldata.hotDogOn;
+		this.cigOn = leveldata.cigOn;
+		this.ingredientsOn = leveldata.ingredientsOn;
+		GridWidth = leveldata.gridWidth;
+		GridHeight = leveldata.gridHeight;
+		gridLayout = new int[GridWidth, GridHeight];
+
+		Array.Copy (leveldata.GetGridLayout(), gridLayout, gridLayout.Length);
+
+
+
+		LoadAssets ();
+
 		if (fatOn == true) {
 			CreateFatBlocks ();
 		}
+		if (hotDogOn) {
+			CreateHotdogs ();
+		}
 
 		if (ingredientsOn == true) {
-			CreateIngredientHolders (4);
+			CreateIngredientHolders (leveldata.ingredientHolders);
 		}
 
 		//set last tiles moved to a position not included in the grid
@@ -72,7 +93,7 @@ public class GridManager : MonoBehaviour
 		scorehandler = GameObject.Find ("scoretext").GetComponent<ScoreHandler> ();
 		playerinput = GameObject.Find ("GameController").GetComponent<PlayerInput> ();
 		sounds = Camera.main.GetComponent<Sounds> ();
-		leveldata = GameObject.Find ("LevelHandler").GetComponent<LevelScript> ();
+
 
 		tileColours = new string[11];
 		tileColours [0] = "strawberry";
@@ -85,29 +106,65 @@ public class GridManager : MonoBehaviour
 		tileColours [7] = "broccoli";
 		tileColours [8] = "watermelon";
 		tileColours [9] = "beer";
-		tileColours [10] = "ciggy";
+		//tileColours [10] = "ciggy";
+
+
 
 		List<Vector2> cigPositions = new List<Vector2> ();
-		for (int x = 0; x < GridWidth; x++) {
-			cigPositions.Add (new Vector2 (x, 3));
+
+		if (cigOn) {
+			cigPositions = leveldata.GetCigPositions ();
 		}
 
-		if (Application.loadedLevel == 2) {
-			StartCoroutine (CreateGridTest (cigPositions));
-		} else {
-			StartCoroutine (CreateGridTest (cigPositions));
-		}
-	
+		StartCoroutine (CreateGridTest (cigPositions));
+	}
 
+	public void LoadAssets(){
 
+		cigaretteTile = Resources.Load ("cigaretteIcon", typeof( GameObject)) as GameObject;
+		fattyBlock = Resources.Load ("fatIcon", typeof( GameObject)) as GameObject;
+		boosterPrefabs = new GameObject[6];
+		boosterPrefabs[0] =  Resources.Load ("boosterPrefabs/strawberry-glowing", typeof( GameObject)) as GameObject;
+		boosterPrefabs[1] =  Resources.Load ("boosterPrefabs/fish-glow", typeof( GameObject)) as GameObject;
+		boosterPrefabs[2] =  Resources.Load ("boosterPrefabs/cheese-glow", typeof( GameObject)) as GameObject;
+		boosterPrefabs[3] =  Resources.Load ("boosterPrefabs/carrot-glow", typeof( GameObject)) as GameObject;
+		boosterPrefabs[4] =  Resources.Load ("boosterPrefabs/bread-glow", typeof( GameObject)) as GameObject;
+		boosterPrefabs[5] =  Resources.Load ("boosterPrefabs/water", typeof( GameObject)) as GameObject;
+		explosion = Resources.Load ("explosion", typeof( GameObject)) as GameObject;
+		hotdog = Resources.Load ("hotdog") as GameObject;
+		ingredientHolder = Resources.Load ("holder") as GameObject;
+		scorePrefabs = new GameObject[8];
+		scorePrefabs [0] = Resources.Load ("points/20") as GameObject;
+		scorePrefabs [1] = Resources.Load ("points/100") as GameObject;
+		scorePrefabs [2] = Resources.Load ("points/200") as GameObject;
+		scorePrefabs [3] = Resources.Load ("points/500") as GameObject;
+		scorePrefabs [4] = Resources.Load ("points/1000") as GameObject;
+		scorePrefabs [5] = Resources.Load ("points/1500") as GameObject;
+		scorePrefabs [6] = Resources.Load ("points/2000") as GameObject;
+		scorePrefabs [7] = Resources.Load ("points/5000") as GameObject;
+		TilePrefabs = new GameObject[10];
+		TilePrefabs[0] = Resources.Load ("tiles/strawberry") as GameObject;
+		TilePrefabs[1] = Resources.Load ("tiles/fish") as GameObject;
+		TilePrefabs[2] = Resources.Load ("tiles/cheese") as GameObject;
+		TilePrefabs[3] = Resources.Load ("tiles/carrot") as GameObject;
+		TilePrefabs[4] = Resources.Load ("tiles/bread") as GameObject;
+		TilePrefabs[5] = Resources.Load ("tiles/raspberry") as GameObject;
+		TilePrefabs[6] = Resources.Load ("tiles/aubergine") as GameObject;
+		TilePrefabs[7] = Resources.Load ("tiles/broccoli") as GameObject;
+		TilePrefabs[8] = Resources.Load ("tiles/watermelon") as GameObject;
+		TilePrefabs[9] = Resources.Load ("tiles/beer") as GameObject;
+		feedback = new GameObject[3];
+		feedback [0] = Resources.Load ("feedback/nicework") as GameObject;
+		feedback [1] = Resources.Load ("feedback/oops") as GameObject;
+		feedback [2] = Resources.Load ("feedback/stayawayfromcigs1") as GameObject;
 	}
 
 	public void CreateIngredientHolders (int amount)
 	{
-
+		Debug.Log ("holders: " + amount);
 		holderPositions = new List<Vector3> ();
 		float y = -1.3f;
-		int startpos = 2;
+		int startpos = 0;
 
 		for (int x = startpos; x < amount + startpos; x++) {
 			Instantiate (ingredientHolder, new Vector2 (x, y), Quaternion.identity);
@@ -117,14 +174,18 @@ public class GridManager : MonoBehaviour
 
 	public List<GameObject> getIngredients ()
 	{
+		
 
 		List<GameObject> ingredients = new List<GameObject> ();
 
-		//check the bottom row
-		for (int x = 0; x < GridWidth; x++) {
-			if (Grid [x, 0].GetComponent<MoveScript> ().isIngredient) {
-				//Debug.Log ("found pepper");
-				ingredients.Add (Grid [x, 0]);
+		if (ingredientsOn) {
+
+			//check the bottom row
+			for (int x = 0; x < GridWidth; x++) {
+				if (Grid [x, 0].GetComponent<MoveScript> ().isIngredient) {
+					//Debug.Log ("found pepper");
+					ingredients.Add (Grid [x, 0]);
+				}
 			}
 		}
 		return ingredients;
@@ -180,7 +241,7 @@ public class GridManager : MonoBehaviour
 		int y = Mathf.RoundToInt (tPos.y);
 
 		//check above
-		if (y < 7) {
+		if (y < GridHeight - 1) {
 			if (Grid [x, y + 1] != null && Grid [x, y + 1].GetComponent<MoveScript> ().getName () == "ciggy") {
 				adjacentCigs.Add (new Vector2 (x, y + 1));
 			}
@@ -192,7 +253,7 @@ public class GridManager : MonoBehaviour
 			}
 		}
 		//check right
-		if (x < 7) {
+		if (x < GridWidth - 1) {
 			if (Grid [x + 1, y] != null && Grid [x + 1, y].GetComponent<MoveScript> ().getName () == "ciggy") {
 				adjacentCigs.Add (new Vector2 (x + 1, y));
 			}
@@ -207,30 +268,30 @@ public class GridManager : MonoBehaviour
 		return adjacentCigs;
 	}
 
-	public void DestroyAdjacentBurgers (List<Vector2>[] matches)
+	public void DestroyAdjacentHotdogs (List<Vector2>[] matches)
 	{
 
 		for (int i = 0; i < index; i++) {
 			foreach (Vector2 tPos in matches[i]) {
 
-				if (Mathf.RoundToInt (tPos.y) < 7) {
-					if (burgerGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y) + 1] != null) {
-						Destroy (burgerGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y) + 1]);
+				if (Mathf.RoundToInt (tPos.y) < GridHeight - 1) {
+					if (hotdogGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y) + 1] != null) {
+						Destroy (hotdogGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y) + 1]);
 					}
 				}
 				if (Mathf.RoundToInt (tPos.y) > 0) {
-					if (burgerGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y) - 1] != null) {
-						Destroy (burgerGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y) - 1]);
+					if (hotdogGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y) - 1] != null) {
+						Destroy (hotdogGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y) - 1]);
 					}
 				}
-				if (Mathf.RoundToInt (tPos.x) < 7) {
-					if (burgerGrid [Mathf.RoundToInt (tPos.x) + 1, Mathf.RoundToInt (tPos.y)] != null) {
-						Destroy (burgerGrid [Mathf.RoundToInt (tPos.x) + 1, Mathf.RoundToInt (tPos.y)]);
+				if (Mathf.RoundToInt (tPos.x) < GridWidth - 1) {
+					if (hotdogGrid [Mathf.RoundToInt (tPos.x) + 1, Mathf.RoundToInt (tPos.y)] != null) {
+						Destroy (hotdogGrid [Mathf.RoundToInt (tPos.x) + 1, Mathf.RoundToInt (tPos.y)]);
 					}
 				}
 				if (Mathf.RoundToInt (tPos.x) > 0) {
-					if (burgerGrid [Mathf.RoundToInt (tPos.x) - 1, Mathf.RoundToInt (tPos.y)] != null) {
-						Destroy (burgerGrid [Mathf.RoundToInt (tPos.x) - 1, Mathf.RoundToInt (tPos.y)]);
+					if (hotdogGrid [Mathf.RoundToInt (tPos.x) - 1, Mathf.RoundToInt (tPos.y)] != null) {
+						Destroy (hotdogGrid [Mathf.RoundToInt (tPos.x) - 1, Mathf.RoundToInt (tPos.y)]);
 					}
 				}
 			}
@@ -242,19 +303,9 @@ public class GridManager : MonoBehaviour
 	void CreateFatBlocks ()
 	{
 		fatGrid = new GameObject[GridWidth, GridHeight];
-		burgerGrid = new GameObject[GridWidth, GridHeight];
 
-		int[,] fatPositions = {
 
-			{ 0, 0, 0, 0, 1, 1, 0, 0 },
-			{ 0, 0, 0, 0, 1, 1, 0, 0 },
-			{ 0, 0, 0, 0, 1, 1, 0, 0 },
-			{ 0, 0, 0, 0, 1, 1, 0, 0 },
-			{ 0, 0, 0, 0, 1, 1, 0, 0 },
-			{ 0, 0, 0, 0, 1, 1, 0, 0 },
-			{ 0, 0, 0, 0, 1, 1, 0, 0 },
-			{ 0, 0, 0, 0, 1, 1, 0, 0 }
-		};
+		int[,] fatPositions = leveldata.GetFatPositions ();
 
 
 
@@ -264,44 +315,32 @@ public class GridManager : MonoBehaviour
 					GameObject fatblock = Instantiate (fattyBlock, new Vector2 (x, y), Quaternion.identity) as GameObject;
 					fatGrid [x, y] = fatblock;
 					fatLeft++;
-					if (hotDogOn) {
-						GameObject burger = Instantiate (h, new Vector2 (x, y), Quaternion.identity) as GameObject;
-						burgerGrid [x, y] = burger;
-					}
+				}
+			}
+		}
+
+
+	}
+
+	void CreateHotdogs ()
+	{
+		hotdogGrid = new GameObject[GridWidth, GridHeight];
+		int[,] hotdogPositions = leveldata.GetFatPositions ();
+
+		for (int x = 0; x < GridHeight; x++) {
+			for (int y = 0; y < GridWidth; y++) {
+				if (hotdogPositions [x, y] == 1) {
+					GameObject hd = Instantiate (hotdog, new Vector2 (x, y), Quaternion.identity) as GameObject;
+					hotdogGrid [x, y] = hd;
 				}
 
 			}
 		}
 
-
 	}
 
-	IEnumerator CreateGrid ()
+	IEnumerator CreateRandomGrid (List<Vector2> cigPositions)
 	{
-		playerinput.currentState = GameState.Animating;
-		Grid = new GameObject[GridWidth, GridHeight];
-		
-		for (int y = GridHeight - 1; y >= 0; y--) {
-			for (int x = 0; x < GridWidth; x++) {
-				int randomTile = Random.Range (0, TilePrefabs.Length - 1);
-
-				GameObject tile = Instantiate (TilePrefabs [randomTile], new Vector2 (x, y), Quaternion.identity) as GameObject;
-				tile.GetComponent<MoveScript> ().tileIndex = randomTile;
-				Grid [x, y] = tile;
-
-				//Assign the tile a name
-				Grid [x, y].GetComponent<MoveScript> ().setName (tileColours [randomTile]);
-
-				yield return new WaitForSeconds (.02f);
-			}
-		}
-			
-		//StartCoroutine (continousCheck ());
-		StartCoroutine (Check ());
-
-	}
-
-	IEnumerator CreateRandomGrid(List<Vector2> cigPositions){
 
 		playerinput.currentState = GameState.Animating;
 		Grid = new GameObject[GridWidth, GridHeight];
@@ -315,7 +354,7 @@ public class GridManager : MonoBehaviour
 				} else {
 
 					//change this back later----------------------------------------------
-					int randomTile = Random.Range(1, 5);
+					int randomTile = UnityEngine.Random.Range (1, 5);
 
 					GameObject tile = Instantiate (TilePrefabs [randomTile], new Vector2 (x, y), Quaternion.identity) as GameObject;
 					tile.GetComponent<MoveScript> ().tileIndex = randomTile;
@@ -336,174 +375,13 @@ public class GridManager : MonoBehaviour
 			}
 		}
 
-		//StartCoroutine (continousCheck ());
 		StartCoroutine (Check ());
 	}
 
 	IEnumerator CreateGridTest (List<Vector2> cigPositions)
 	{
 
-
-
-		//L shape
-		int[,] testGrid1 = {{ 4, 5, 6, 1, 2, 3, 0, 3 },
-			{ 3, 4, 6, 1, 2, 5, 5, 3 },
-			{ 2, 2, 4, 0, 1, 1, 5, 2 },
-			{ 4, 5, 6, 1, 2, 3, 0, 3 },
-			{ 5, 6, 5, 2, 2, 6, 5, 5 },
-			{ 3, 2, 4, 2, 3, 5, 5, 0 },
-			{ 4, 6, 2, 3, 5, 4, 6, 0 },
-			{ 2, 0, 5, 5, 0, 5, 2, 4 }
-		}; 
-
-
-		//T shape
-		int[,] testGrid2 = {{ 4, 5, 6, 4, 2, 3, 0, 3 },
-			{ 3, 4, 6, 1, 2, 5, 5, 3 },
-			{ 2, 2, 1, 0, 1, 1, 5, 2 },
-			{ 4, 5, 6, 1, 2, 3, 0, 3 },
-			{ 5, 6, 5, 2, 2, 6, 5, 5 },
-			{ 3, 2, 4, 2, 3, 5, 5, 0 },
-			{ 4, 6, 2, 3, 5, 4, 6, 0 },
-			{ 2, 0, 5, 5, 0, 5, 2, 4 }
-		}; 
-					
-
-		//5 in a row
-		int[,] testGrid3 = {{ 4, 5, 6, 4, 2, 3, 0, 4 },
-			{ 3, 4, 6, 1, 2, 1, 0, 3 },
-			{ 2, 1, 1, 0, 1, 1, 2, 1 },
-			{ 4, 5, 6, 2, 2, 3, 0, 3 },
-			{ 4, 6, 1, 2, 2, 6, 0, 2 },
-			{ 3, 5, 4, 0, 3, 4, 1, 0 },
-			{ 4, 6, 2, 3, 2, 4, 6, 1 },
-			{ 2, 0, 0, 1, 0, 3, 2, 4 }
-		}; 
-
-		
-		//cigarette drop test
-		int[,] testGrid4 = {{ 4, 5, 2, 6, 2, 3, 0, 3 },
-			{ 3, 4, 4, 6, 2, 5, 5, 3 },
-			{ 2, 1, 1, 6, 1, 1, 5, 2 },
-			{ 2, 5, 2, 6, 2, 3, 0, 3 },
-			{ 2, 3, 5, 6, 2, 1, 5, 5 },
-			{ 2, 2, 4, 6, 3, 5, 5, 0 },
-			{ 2, 0, 2, 6, 5, 4, 4, 0 },
-			{ 4, 0, 5, 6, 0, 5, 2, 4 }
-		}; 
-
-
-		//no possible matches except special booster
-		int[,] testGrid5 = {{ 1, 4, 2, 5, 3, 1, 4, 2 },
-			{ 2, 5, 3, 1, 4, 2, 5, 4 },
-			{ 3, 1, 4, 2, 5, 3, 1, 4 },
-			{ 4, 2, 5, 3, 1, 4, 2, 4 },
-			{ 5, 3, 1, 4, 2, 5, 3, 4 },
-			{ 1, 4, 2, 5, 3, 1, 4, 4 },
-			{ 2, 5, 3, 1, 4, 2, 5, 3 },
-			{ 3, 1, 4, 2, 5, 3, 1, 4 }
-		}; 
-
-		//4 in a row
-		int[,] testGrid6 = {{ 4, 5, 6, 4, 2, 3, 0, 3 },
-			{ 3, 4, 6, 1, 2, 5, 5, 3 },
-			{ 2, 4, 1, 0, 1, 1, 5, 2 },
-			{ 4, 5, 6, 2, 2, 3, 0, 3 },
-			{ 5, 6, 5, 2, 2, 6, 5, 5 },
-			{ 3, 2, 4, 2, 3, 5, 5, 0 },
-			{ 4, 6, 2, 3, 5, 4, 6, 0 },
-			{ 2, 0, 5, 5, 0, 5, 2, 4 }
-		}; 
-
-
-		//4 after collapse
-		int[,] testGrid7 = {{ 4, 5, 6, 4, 2, 3, 0, 3 },
-			{ 3, 4, 6, 2, 2, 5, 5, 3 },
-			{ 2, 1, 1, 0, 1, 1, 5, 2 },
-			{ 4, 5, 6, 2, 2, 3, 0, 3 },
-			{ 5, 6, 3, 2, 2, 6, 5, 5 },
-			{ 3, 2, 4, 3, 3, 5, 5, 0 },
-			{ 4, 6, 6, 3, 6, 6, 2, 0 },
-			{ 2, 0, 5, 5, 0, 5, 2, 4 }
-		}; 
-					
-
-		//2 5's at once
-		int[,] testGrid8 = {{ 4, 5, 6, 4, 2, 3, 5, 3 },
-			{ 3, 4, 6, 2, 2, 5, 5, 3 },
-			{ 2, 1, 1, 5, 1, 1, 3, 5 },
-			{ 4, 5, 5, 1, 5, 5, 5, 3 },
-			{ 5, 6, 3, 2, 2, 4, 2, 2 },
-			{ 3, 5, 4, 3, 3, 4, 1, 0 },
-			{ 4, 5, 6, 3, 6, 6, 2, 0 },
-			{ 2, 0, 5, 5, 0, 5, 2, 4 }
-		}; 
-
-		//Generic Test Grid
-		int[,] testGrid9 = {{ 1, 1, 1, 1, 1, 1, 1, 1 },
-			{ 1, 1, 0, 1, 1, 1, 1, 3 },
-			{ 1, 1, 1, 1, 1, 1, 1, 1 },
-			{ 1, 1, 0, 1, 1, 1, 1, 3 },
-			{ 1, 1, 1, 1, 1, 1, 1, 1 },
-			{ 1, 1, 1, 1, 1, 1, 1, 1 },
-			{ 1, 1, 1, 1, 1, 1, 1, 1 },
-			{ 1, 1, 1, 1, 1, 1, 1, 1 }
-		}; 
-
-		//beer test
-		int[,] testGrid10 = {{ 4, 5, 6, 4, 2, 3, 0, 3 },
-			{ 3, 4, 6, 2, 2, 5, 5, 3 },
-			{ 2, 1, 1, 5, 1, 2, 5, 2 },
-			{ 4, 5, 5, 1, 5, 3, 0, 3 },
-			{ 5, 6, 3, 2, 2, 6, 5, 5 },
-			{ 3, 5, 4, 0, 3, 5, 5, 0 },
-			{ 4, 5, 6, 0, 6, 6, 2, 0 },
-			{ 2, 0, 5, 0, 0, 5, 2, 4 }
-		}; 
-
-		//Ultimate test
-		int[,] testGrid11 = {{ 2, 8, 0, 4, 1, 1, 3, 0 },
-							{ 2, 4, 1, 8, 4, 4, 3, 0 },
-							{ 1, 2, 9, 2, 2, 0, 0, 3 },
-							{ 1, 7, 9, 0, 1, 2, 3, 0 },
-							{ 3, 1, 9, 3, 1, 0, 3, 1 },
-							{ 1, 6, 9, 3, 9, 1, 2, 3 },
-							{ 3, 2, 5, 2, 2, 1, 3, 0 },
-							{ 3, 4, 2, 3, 0, 0, 3, 0 }
-						}; 
-
-		//2 4's at once
-		int[,] testGrid12 = {{ 4, 5, 6, 4, 2, 3, 0, 3 },
-			{ 3, 4, 6, 2, 2, 5, 5, 3 },
-			{ 2, 1, 1, 5, 1, 2, 5, 2 },
-			{ 4, 5, 5, 1, 5, 3, 5, 3 },
-			{ 5, 6, 3, 2, 2, 6, 5, 5 },
-			{ 3, 5, 4, 3, 3, 5, 0, 0 },
-			{ 4, 5, 6, 3, 6, 6, 2, 0 },
-			{ 2, 0, 5, 5, 0, 5, 2, 4 }
-		}; 
-
-		//Ultimate test
-		int[,] testGrid13 = {{ 2, 8, 0, 4, 1, 1, 3, 0 },
-							{ 2, 4, 1, 8, 4, 4, 3, 0 },
-							{ 1, 2, 9, 2, 2, 0, 0, 3 },
-							{ 1, 7, 9, 0, 1, 2, 3, 0 },
-							{ 3, 1, 9, 3, 1, 0, 3, 0 },
-							{ 1, 6, 9, 3, 9, 1, 0, 3 },
-							{ 3, 2, 5, 2, 2, 1, 3, 0 },
-							{ 3, 4, 2, 3, 0, 0, 3, 0 }
-						}; 
-
-		//Ultimate test
-		int[,] testGrid14 = {{ 2, 8, 2, 4, 1, 3, 1, 0 },
-							 { 2, 4, 2, 8, 4, 3, 2, 0 },
-							 { 1, 2, 1, 3, 3, 3, 3, 3 },
-							 { 1, 7, 2, 0, 1, 3, 2, 2 },
-							 { 3, 1, 3, 3, 1, 0, 3, 1 },
-							 { 1, 6, 4, 3, 0, 1, 0, 3 },
-							 { 3, 2, 5, 2, 2, 1, 3, 0 },
-							 { 3, 4, 2, 3, 0, 0, 3, 0 }
-						}; 
+		int[,] gridContent = leveldata.GetGridContent ();
 
 		playerinput.currentState = GameState.Animating;
 		Grid = new GameObject[GridWidth, GridHeight];
@@ -511,39 +389,27 @@ public class GridManager : MonoBehaviour
 		for (int y = GridHeight - 1; y >= 0; y--) {
 			for (int x = 0; x < GridWidth; x++) {
 
-
-				if (cigPositions.Contains (new Vector2 (x, y))) {
-					CreateCigarette (new Vector2 (x, y));
-				}
-				else {
-
-					//change this back later----------------------------------------------
-					int randomTile;
-					if (Application.loadedLevel == 2d) {
-						randomTile = testGrid11 [x, y];
+					if (cigPositions.Contains (new Vector2 (x, y))) {
+						CreateCigarette (new Vector2 (x, y));
 					} else {
-						randomTile = testGrid13 [x, y];
+					
+						int tileType = gridContent [x, y];
+						GameObject tile = Instantiate (TilePrefabs [tileType], new Vector2 (x, y), Quaternion.identity) as GameObject;
+						tile.GetComponent<MoveScript> ().tileIndex = tileType;
+
+						//set ingredients
+						if (tileType >= 5 && tileType <= 8) {
+							tile.GetComponent<MoveScript> ().isIngredient = true;
+						}
+						Grid [x, y] = tile;
+
+						//Assign the tile a name
+						Grid [x, y].GetComponent<MoveScript> ().setName (tileColours [tileType]);
 					}
-					GameObject tile = Instantiate (TilePrefabs [randomTile], new Vector2 (x, y), Quaternion.identity) as GameObject;
-					tile.GetComponent<MoveScript> ().tileIndex = randomTile;
-
-					//if pepper will make an ingredient
-					if (randomTile >= 5 && randomTile <= 8) {
-						tile.GetComponent<MoveScript> ().isIngredient = true;
-					}
-					Grid [x, y] = tile;
-
-					//Assign the tile a name
-					Grid [x, y].GetComponent<MoveScript> ().setName (tileColours [randomTile]);
-
-				}
-
-
-				yield return new WaitForSeconds (.02f);
+					yield return new WaitForSeconds (.02f);
+				
 			}
 		}
-
-		//StartCoroutine (continousCheck ());
 		StartCoroutine (Check ());
 
 	}
@@ -620,7 +486,7 @@ public class GridManager : MonoBehaviour
 			if (playerinput.currentState == GameState.Animating) {
 				sounds.PlaySound ("explosion");
 				scorehandler.AddPoints (1000); //this needs to be changed later------gets called twice-----------------
-				Instantiate (scorePrefabs[6], pos, Quaternion.identity);
+				Instantiate (scorePrefabs [6], pos, Quaternion.identity);
 			}
 			return true;
 		} else {
@@ -664,7 +530,8 @@ public class GridManager : MonoBehaviour
 		//check horizontal matches
 		for (int y = 0; y < GridHeight; y++) {
 			for (int x = 0; x < GridWidth; x++) {
-				
+
+
 				if (currentName != gridToCheck [x, y].GetComponent<MoveScript> ().getName ()) {
 
 					if (matchPositions.Count >= 3) {
@@ -673,7 +540,7 @@ public class GridManager : MonoBehaviour
 						foreach (Vector2 match in matchPositions) {
 
 							//if (!matchSets [index].Contains (match)) {
-								matchSets [index].Add (match);
+							matchSets [index].Add (match);
 							//}
 							if (checkForBooster (match)) {
 
@@ -681,7 +548,7 @@ public class GridManager : MonoBehaviour
 								List<Vector2> rowCol = getRowCol (match);
 								foreach (Vector2 item in rowCol) {
 									//if (!matchSets [index].Contains (item)) {
-										matchSets [index].Add (item);
+									matchSets [index].Add (item);
 									//}
 								}
 							}
@@ -709,7 +576,7 @@ public class GridManager : MonoBehaviour
 			foreach (Vector2 match in matchPositions) {
 
 				//if (!matchSets [index].Contains (match)) {
-					matchSets [index].Add (match);
+				matchSets [index].Add (match);
 				//}
 
 				if (checkForBooster (match)) {
@@ -717,7 +584,7 @@ public class GridManager : MonoBehaviour
 					List<Vector2> rowCol = getRowCol (match);
 					foreach (Vector2 item in rowCol) {
 						//if (!matchSets [index].Contains (item)) {
-							matchSets [index].Add (item);
+						matchSets [index].Add (item);
 						//}
 					}
 				}
@@ -742,7 +609,7 @@ public class GridManager : MonoBehaviour
 
 							//ensures there are no duplicates
 							//if (!matchSets [index].Contains (match)) {
-								matchSets [index].Add (match);
+							matchSets [index].Add (match);
 							//}
 
 							if (checkForBooster (match)) {
@@ -750,7 +617,7 @@ public class GridManager : MonoBehaviour
 								List<Vector2> rowCol = getRowCol (match);
 								foreach (Vector2 item in rowCol) {
 									//if (!matchSets [index].Contains (item)) {
-										matchSets [index].Add (item);
+									matchSets [index].Add (item);
 									//}
 								}
 							}
@@ -778,7 +645,7 @@ public class GridManager : MonoBehaviour
 			foreach (Vector2 match in matchPositions) {
 
 				//if (!matchSets [index].Contains (match)) {
-					matchSets [index].Add (match);
+				matchSets [index].Add (match);
 				//}
 
 				if (checkForBooster (match)) {
@@ -786,9 +653,9 @@ public class GridManager : MonoBehaviour
 					//get col and row of booster
 					List<Vector2> rowCol = getRowCol (match);
 					foreach (Vector2 item in rowCol) {
-					//	if (!matchSets [index].Contains (item)) {
-							matchSets [index].Add (item);
-					//	}
+						//	if (!matchSets [index].Contains (item)) {
+						matchSets [index].Add (item);
+						//	}
 					}
 				}
 			}
@@ -810,7 +677,8 @@ public class GridManager : MonoBehaviour
 	}
 
 
-	public List<Vector2>[] SortByMatchSize(List<Vector2>[] matchSets){
+	public List<Vector2>[] SortByMatchSize (List<Vector2>[] matchSets)
+	{
 
 		int n = index;
 		int k;
@@ -901,19 +769,19 @@ public class GridManager : MonoBehaviour
 			switch (count) {
 			case 1:
 				scorehandler.AddPoints (20);
-				Instantiate (scorePrefabs[0], matchSets [i].ElementAt (count/2), Quaternion.identity);
+				Instantiate (scorePrefabs [0], matchSets [i].ElementAt (count / 2), Quaternion.identity);
 				break;
 			case 3:
 				scorehandler.AddPoints (100);
-				Instantiate (scorePrefabs[1], matchSets [i].ElementAt (count/2), Quaternion.identity);
+				Instantiate (scorePrefabs [1], matchSets [i].ElementAt (count / 2), Quaternion.identity);
 				break;
 			case 4:
 				scorehandler.AddPoints (200);
-				Instantiate (scorePrefabs[2], matchSets [i].ElementAt (count/2), Quaternion.identity);
+				Instantiate (scorePrefabs [2], matchSets [i].ElementAt (count / 2), Quaternion.identity);
 				break;
 			case 5:
 				scorehandler.AddPoints (500);
-				Instantiate (scorePrefabs[3], matchSets [i].ElementAt (count/2), Quaternion.identity);
+				Instantiate (scorePrefabs [3], matchSets [i].ElementAt (count / 2), Quaternion.identity);
 				break;
 			case 15:
 				//for a deleted row and col
@@ -964,7 +832,7 @@ public class GridManager : MonoBehaviour
 		}
 
 		if (hotDogOn) {
-			DestroyAdjacentBurgers (matchSets);
+			DestroyAdjacentHotdogs (matchSets);
 		}
 
 		if (cigOn) {
@@ -983,7 +851,7 @@ public class GridManager : MonoBehaviour
 
 	public void DestroyTile (Vector2 tPos, bool explode)
 	{
-
+		
 		//dont destroy if it's an ingredient
 		if (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] != null && Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)].GetComponent<MoveScript> ().isIngredient) {
 
@@ -1001,9 +869,9 @@ public class GridManager : MonoBehaviour
 			Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = null;
 
 			if (hotDogOn && fatOn) {
-				if (burgerGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] != null) {
-					Destroy (burgerGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]);
-					burgerGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = null;
+				if (hotdogGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] != null) {
+					Destroy (hotdogGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]);
+					hotdogGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = null;
 				} else if (fatGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] != null) {
 					Destroy (fatGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]);
 					fatGrid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = null;
@@ -1015,19 +883,19 @@ public class GridManager : MonoBehaviour
 	public void DestroyGridQuarter (Vector2 tPos)
 	{
 		scorehandler.AddPoints (1000);
-		Instantiate (scorePrefabs[4], tPos, Quaternion.identity);
+		Instantiate (scorePrefabs [4], tPos, Quaternion.identity);
 
 		int posX = Mathf.RoundToInt (tPos.x);
 		int posY = Mathf.RoundToInt (tPos.y);
 		int quarter = 0;
 
-		if (posX < 4 && posY >= 4) {
+		if (posX < GridWidth/2 && posY >= GridHeight/2) {
 			quarter = 1;
-		} else if (posX >= 4 && posY >= 4) {
+		} else if (posX >= GridWidth/2 && posY >= GridHeight/2) {
 			quarter = 2;
-		} else if (posX < 4 && posY < 4) {
+		} else if (posX < GridWidth/2 && posY < GridHeight/2) {
 			quarter = 3;
-		} else if (posX >= 4 && posY < 4) {
+		} else if (posX >= GridWidth/2 && posY < GridHeight/2) {
 			quarter = 4;
 		}
 			
@@ -1035,29 +903,29 @@ public class GridManager : MonoBehaviour
 
 		if (quarter == 1) {
 
-			for (int y = 4; y < 8; y++) {
-				for (int x = 0; x < 4; x++) {
+			for (int y = GridHeight/2; y < GridHeight; y++) {
+				for (int x = 0; x < GridWidth/2; x++) {
 					DestroyTile (new Vector2 (x, y), true);
 				}
 			}
 		} else if (quarter == 2) {
 
-			for (int y = 4; y < 8; y++) {
-				for (int x = 4; x < 8; x++) {
+			for (int y = GridHeight/2; y < GridHeight; y++) {
+				for (int x = GridWidth/2; x < GridWidth; x++) {
 					DestroyTile (new Vector2 (x, y), true);
 				}
 			}
 		} else if (quarter == 3) {
 
-			for (int y = 0; y < 4; y++) {
-				for (int x = 0; x < 4; x++) {
+			for (int y = 0; y < GridHeight/2; y++) {
+				for (int x = 0; x < GridWidth/2; x++) {
 					DestroyTile (new Vector2 (x, y), true);
 				}
 			}
 		} else if (quarter == 4) {
 
-			for (int y = 0; y < 4; y++) {
-				for (int x = 4; x < 8; x++) {
+			for (int y = 0; y < GridHeight/2; y++) {
+				for (int x = GridWidth/2; x < GridWidth; x++) {
 					DestroyTile (new Vector2 (x, y), true);
 				}
 			}
@@ -1075,19 +943,19 @@ public class GridManager : MonoBehaviour
 		//we have to fix this issue at some stage---------------------------------------------------------------------------------
 		//if (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] != null) {
 
-			sounds.PlaySound ("booster");
-			DisplayFeedback (0);
+		sounds.PlaySound ("booster");
+		DisplayFeedback (0);
 
-			//sometimes tile can be part of a 3 match and a 4 match and couldve already been deleted in the 3 match
-			int tileType = (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]).GetComponent<MoveScript> ().tileIndex;
+		//sometimes tile can be part of a 3 match and a 4 match and couldve already been deleted in the 3 match
+		int tileType = (Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)]).GetComponent<MoveScript> ().tileIndex;
 
-			DestroyTile (new Vector2 (tPos.x, tPos.y), true);
-			//Destroy (Grid [Mathf.RoundToInt(tPos.x),Mathf.RoundToInt(tPos.y)]);
-			GameObject tile = Instantiate (boosterPrefabs [tileType], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
-			tile.GetComponent<MoveScript> ().setName (tileColours [tileType]);
-			tile.GetComponent<MoveScript> ().isBooster = true;
-			tile.GetComponent<MoveScript> ().tileIndex = tileType;
-			Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
+		DestroyTile (new Vector2 (tPos.x, tPos.y), true);
+		//Destroy (Grid [Mathf.RoundToInt(tPos.x),Mathf.RoundToInt(tPos.y)]);
+		GameObject tile = Instantiate (boosterPrefabs [tileType], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
+		tile.GetComponent<MoveScript> ().setName (tileColours [tileType]);
+		tile.GetComponent<MoveScript> ().isBooster = true;
+		tile.GetComponent<MoveScript> ().tileIndex = tileType;
+		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
 		//}
 	}
 
@@ -1107,7 +975,8 @@ public class GridManager : MonoBehaviour
 	{
 		DestroyTile (new Vector2 (tPos.x, tPos.y), false);
 		//Destroy (Grid [Mathf.RoundToInt(tPos.x), Mathf.RoundToInt(tPos.y)]);
-		GameObject tile = Instantiate (TilePrefabs [10], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
+		//GameObject tile = Instantiate (TilePrefabs [10], new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
+		GameObject tile = Instantiate (cigaretteTile, new Vector2 (Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)), Quaternion.identity) as GameObject;
 		cigCount++;
 		tile.GetComponent<MoveScript> ().setName ("ciggy");
 		Grid [Mathf.RoundToInt (tPos.x), Mathf.RoundToInt (tPos.y)] = tile;
@@ -1170,7 +1039,7 @@ public class GridManager : MonoBehaviour
 
 			//instantiate new tiles
 			for (int i = 0; i < missingTileCount; i++) {
-				int randomTileID = Random.Range (0, 5);
+				int randomTileID = UnityEngine.Random.Range (0, 5);
 				GameObject tile = Instantiate (TilePrefabs [randomTileID], new Vector2 (x, GridHeight + i), Quaternion.identity) as GameObject;
 				tile.GetComponent<MoveScript> ().setName (tileColours [randomTileID]);
 				tile.GetComponent<MoveScript> ().tileIndex = randomTileID;
@@ -1272,7 +1141,7 @@ public class GridManager : MonoBehaviour
 		//spawn a cig in the first available cel in the row
 		for (int y = row; y < GridWidth; y++) {
 			for (int x = col; x < GridHeight; x++) {
-				if (Grid[x,y] != null && Grid [x, y].GetComponent<MoveScript> ().getName () != "ciggy" && Grid [x, y].GetComponent<MoveScript> ().isIngredient == false) {
+				if (Grid [x, y] != null && Grid [x, y].GetComponent<MoveScript> ().getName () != "ciggy" && Grid [x, y].GetComponent<MoveScript> ().isIngredient == false) {
 
 					CreateCigarette (new Vector2 (x, y));
 
@@ -1298,7 +1167,7 @@ public class GridManager : MonoBehaviour
 	{
 		List<Vector2>[] matches;
 		UpdateGridArray (); //update grid
-		//PrintGrid(Grid);
+		PrintGrid(Grid);
 		matches = getMatches (Grid); //Retrieve any new matches
 
 		List<GameObject> ingredients = getIngredients ();
@@ -1316,7 +1185,7 @@ public class GridManager : MonoBehaviour
 		}
 
 		if (hotDogOn) {
-			DestroyAdjacentBurgers (matches);
+			DestroyAdjacentHotdogs (matches);
 		}
 
 		//allow for only one cigspawn per tile move
@@ -1329,6 +1198,7 @@ public class GridManager : MonoBehaviour
 
 		//but what if the ingredient count is more than 0???????
 		if (matches [0] == null && ingredients.Count == 0) {
+
 
 			playerinput.currentState = GameState.None;
 
@@ -1345,68 +1215,13 @@ public class GridManager : MonoBehaviour
 		}
 	}
 
-	public IEnumerator continousCheck ()
-	{
-		bool firstTime = true;
-		List<Vector2>[] matches;
-
-		do {
-			if (!firstTime || automate)//to prevent a double wait period
-			yield return new WaitForSeconds (dropTime - 0.3f); //wait for new tiles to drop
-			UpdateGridArray (); //update grid
-			matches = getMatches (Grid); //Retrieve any new matches
-
-			if (ingredientsOn) {
-				List<GameObject> ingredients = getIngredients ();
-				foreach (GameObject ingredient in ingredients) {
-					moveIntoHolder (ingredient);
-				}
-			}
-			//yield return new WaitForSeconds (0.4f);
-			//UpdateGridArray (); //update grid
-
-			if (matches [0] == null && !ingredientsOn) {
-				break;
-			}
-
-
-			if (cigOn) {
-				if (!CigsDestroyed (matches)) {
-					//Debug.Log ("Spawn a cigarette");
-					if (firstTime)
-						SpawnCig (3, 0);
-				}
-			}
-
-
-
-			//Debug.Log ("printing matchsets");
-			//printMatchSets (matches);
-			DestroyTiles (matches);	//Destroy tiles from matches
-			yield return new WaitForSeconds (0.2f);
-			ReplaceTiles ();			//Replace these tiles
-			firstTime = false;
-		} while(matches [0] != null);
-			
-		//PrintGrid (Grid);
-		playerinput.currentState = GameState.None;
-
-		//if no more moves are possible then we need to reshuffle/recreate the grid
-		//also if there is a special booster we shouldnt reset the grid
-		if (checkForPossibleMoves () == false && CheckGridForSpecBooster () == false) {
-			ReplaceGrid ();
-		}
-
-		//Debug.Log ("Number of cigs: " + cigCount);
-	}
-
 	public bool checkForPossibleMoves ()
 	{
 		//Debug.Log ("checking for moves");
 		//this is where we should check if there are any more available moves
 		//swap with neighbour to the right
-		for (int x = 0; x <= 6; x++) {
-			for (int y = 7; y >= 0; y--) {
+		for (int x = 0; x < GridWidth - 1; x++) {
+			for (int y = GridHeight -1; y >= 0; y--) {
 				GameObject[,] TempGrid = new GameObject[GridWidth, GridHeight];
 				CopyArray (Grid, TempGrid);
 				//swap tiles
@@ -1433,8 +1248,8 @@ public class GridManager : MonoBehaviour
 		}
 			
 		//now swap with neighbour underneath
-		for (int x = 0; x <= 7; x++) {
-			for (int y = 7; y >= 1; y--) {
+		for (int x = 0; x < GridWidth; x++) {
+			for (int y = GridHeight -1; y >= 1; y--) {
 				GameObject[,] TempGrid = new GameObject[GridWidth, GridHeight];
 				CopyArray (Grid, TempGrid);
 				//swap tiles
@@ -1496,8 +1311,8 @@ public class GridManager : MonoBehaviour
 	void CopyArray (GameObject[,] from, GameObject[,] to)
 	{
 
-		for (int x = 0; x <= 7; x++) {
-			for (int y = 0; y <= 7; y++) {
+		for (int x = 0; x < GridWidth; x++) {
+			for (int y = 0; y < GridHeight; y++) {
 				to [x, y] = from [x, y];
 			}
 		}
@@ -1525,6 +1340,171 @@ public class GridManager : MonoBehaviour
 		
 		Debug.Log (gridlayout);
 
+	}
+
+	void grids ()
+	{
+
+
+		//L shape
+		int[,] testGrid1 = {{ 4, 5, 6, 1, 2, 3, 0, 3 },
+			{ 3, 4, 6, 1, 2, 5, 5, 3 },
+			{ 2, 2, 4, 0, 1, 1, 5, 2 },
+			{ 4, 5, 6, 1, 2, 3, 0, 3 },
+			{ 5, 6, 5, 2, 2, 6, 5, 5 },
+			{ 3, 2, 4, 2, 3, 5, 5, 0 },
+			{ 4, 6, 2, 3, 5, 4, 6, 0 },
+			{ 2, 0, 5, 5, 0, 5, 2, 4 }
+		}; 
+
+
+		//T shape
+		int[,] testGrid2 = {{ 4, 5, 6, 4, 2, 3, 0, 3 },
+			{ 3, 4, 6, 1, 2, 5, 5, 3 },
+			{ 2, 2, 1, 0, 1, 1, 5, 2 },
+			{ 4, 5, 6, 1, 2, 3, 0, 3 },
+			{ 5, 6, 5, 2, 2, 6, 5, 5 },
+			{ 3, 2, 4, 2, 3, 5, 5, 0 },
+			{ 4, 6, 2, 3, 5, 4, 6, 0 },
+			{ 2, 0, 5, 5, 0, 5, 2, 4 }
+		}; 
+
+
+		//5 in a row
+		int[,] testGrid3 = {{ 4, 5, 6, 4, 2, 3, 0, 4 },
+			{ 3, 4, 6, 1, 2, 1, 0, 3 },
+			{ 2, 1, 1, 0, 1, 1, 2, 1 },
+			{ 4, 5, 6, 2, 2, 3, 0, 3 },
+			{ 4, 6, 1, 2, 2, 6, 0, 2 },
+			{ 3, 5, 4, 0, 3, 4, 1, 0 },
+			{ 4, 6, 2, 3, 2, 4, 6, 1 },
+			{ 2, 0, 0, 1, 0, 3, 2, 4 }
+		}; 
+
+
+		//cigarette drop test
+		int[,] testGrid4 = {{ 4, 5, 2, 6, 2, 3, 0, 3 },
+			{ 3, 4, 4, 6, 2, 5, 5, 3 },
+			{ 2, 1, 1, 6, 1, 1, 5, 2 },
+			{ 2, 5, 2, 6, 2, 3, 0, 3 },
+			{ 2, 3, 5, 6, 2, 1, 5, 5 },
+			{ 2, 2, 4, 6, 3, 5, 5, 0 },
+			{ 2, 0, 2, 6, 5, 4, 4, 0 },
+			{ 4, 0, 5, 6, 0, 5, 2, 4 }
+		}; 
+
+
+		//no possible matches except special booster
+		int[,] testGrid5 = {{ 1, 4, 2, 5, 3, 1, 4, 2 },
+			{ 2, 5, 3, 1, 4, 2, 5, 4 },
+			{ 3, 1, 4, 2, 5, 3, 1, 4 },
+			{ 4, 2, 5, 3, 1, 4, 2, 4 },
+			{ 5, 3, 1, 4, 2, 5, 3, 4 },
+			{ 1, 4, 2, 5, 3, 1, 4, 4 },
+			{ 2, 5, 3, 1, 4, 2, 5, 3 },
+			{ 3, 1, 4, 2, 5, 3, 1, 4 }
+		}; 
+
+		//4 in a row
+		int[,] testGrid6 = {{ 4, 5, 6, 4, 2, 3, 0, 3 },
+			{ 3, 4, 6, 1, 2, 5, 5, 3 },
+			{ 2, 4, 1, 0, 1, 1, 5, 2 },
+			{ 4, 5, 6, 2, 2, 3, 0, 3 },
+			{ 5, 6, 5, 2, 2, 6, 5, 5 },
+			{ 3, 2, 4, 2, 3, 5, 5, 0 },
+			{ 4, 6, 2, 3, 5, 4, 6, 0 },
+			{ 2, 0, 5, 5, 0, 5, 2, 4 }
+		}; 
+
+
+		//4 after collapse
+		int[,] testGrid7 = {{ 4, 5, 6, 4, 2, 3, 0, 3 },
+			{ 3, 4, 6, 2, 2, 5, 5, 3 },
+			{ 2, 1, 1, 0, 1, 1, 5, 2 },
+			{ 4, 5, 6, 2, 2, 3, 0, 3 },
+			{ 5, 6, 3, 2, 2, 6, 5, 5 },
+			{ 3, 2, 4, 3, 3, 5, 5, 0 },
+			{ 4, 6, 6, 3, 6, 6, 2, 0 },
+			{ 2, 0, 5, 5, 0, 5, 2, 4 }
+		}; 
+
+
+		//2 5's at once
+		int[,] testGrid8 = {{ 4, 5, 6, 4, 2, 3, 5, 3 },
+			{ 3, 4, 6, 2, 2, 5, 5, 3 },
+			{ 2, 1, 1, 5, 1, 1, 3, 5 },
+			{ 4, 5, 5, 1, 5, 5, 5, 3 },
+			{ 5, 6, 3, 2, 2, 4, 2, 2 },
+			{ 3, 5, 4, 3, 3, 4, 1, 0 },
+			{ 4, 5, 6, 3, 6, 6, 2, 0 },
+			{ 2, 0, 5, 5, 0, 5, 2, 4 }
+		}; 
+
+		//Generic Test Grid
+		int[,] testGrid9 = {{ 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 0, 1, 1, 1, 1, 3 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 0, 1, 1, 1, 1, 3 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1 }
+		}; 
+
+		//beer test
+		int[,] testGrid10 = {{ 4, 5, 6, 4, 2, 3, 0, 3 },
+			{ 3, 4, 6, 2, 2, 5, 5, 3 },
+			{ 2, 1, 1, 5, 1, 2, 5, 2 },
+			{ 4, 5, 5, 1, 5, 3, 0, 3 },
+			{ 5, 6, 3, 2, 2, 6, 5, 5 },
+			{ 3, 5, 4, 0, 3, 5, 5, 0 },
+			{ 4, 5, 6, 0, 6, 6, 2, 0 },
+			{ 2, 0, 5, 0, 0, 5, 2, 4 }
+		}; 
+
+		//Ultimate test
+		int[,] testGrid11 = {{ 2, 8, 0, 4, 1, 1, 3, 0 },
+			{ 2, 4, 1, 8, 4, 4, 3, 0 },
+			{ 1, 2, 9, 2, 2, 0, 0, 3 },
+			{ 1, 7, 9, 0, 1, 2, 3, 0 },
+			{ 3, 1, 9, 3, 1, 0, 3, 1 },
+			{ 1, 6, 9, 3, 9, 1, 2, 3 },
+			{ 3, 2, 5, 2, 2, 1, 3, 0 },
+			{ 3, 4, 2, 3, 0, 0, 3, 0 }
+		}; 
+
+		//2 4's at once
+		int[,] testGrid12 = {{ 4, 5, 6, 4, 2, 3, 0, 3 },
+			{ 3, 4, 6, 2, 2, 5, 5, 3 },
+			{ 2, 1, 1, 5, 1, 2, 5, 2 },
+			{ 4, 5, 5, 1, 5, 3, 5, 3 },
+			{ 5, 6, 3, 2, 2, 6, 5, 5 },
+			{ 3, 5, 4, 3, 3, 5, 0, 0 },
+			{ 4, 5, 6, 3, 6, 6, 2, 0 },
+			{ 2, 0, 5, 5, 0, 5, 2, 4 }
+		}; 
+
+		//Ultimate test
+		int[,] testGrid13 = {{ 2, 8, 0, 4, 1, 1, 3, 0 },
+			{ 2, 4, 1, 8, 4, 4, 3, 0 },
+			{ 1, 2, 9, 2, 2, 0, 0, 3 },
+			{ 1, 7, 9, 0, 1, 2, 3, 0 },
+			{ 3, 1, 9, 3, 1, 0, 3, 0 },
+			{ 1, 6, 9, 3, 9, 1, 0, 3 },
+			{ 3, 2, 5, 2, 2, 1, 3, 0 },
+			{ 3, 4, 2, 3, 0, 0, 3, 0 }
+		}; 
+
+		//Ultimate test
+		int[,] testGrid14 = {{ 2, 8, 2, 4, 1, 3, 1, 0 },
+			{ 2, 4, 2, 8, 4, 3, 2, 0 },
+			{ 1, 2, 1, 3, 3, 3, 3, 3 },
+			{ 1, 7, 2, 0, 1, 3, 2, 2 },
+			{ 3, 1, 3, 3, 1, 0, 3, 1 },
+			{ 1, 6, 4, 3, 0, 1, 0, 3 },
+			{ 3, 2, 5, 2, 2, 1, 3, 0 },
+			{ 3, 4, 2, 3, 0, 0, 3, 0 }
+		};
 	}
 }
 

@@ -1214,6 +1214,50 @@ public class GridManager : MonoBehaviour
 			Debug.Log ("GAME OVER");
 		}
 	}
+		
+	public bool QuickHorizCheck(GameObject[,] TempGrid, GameObject tile){
+
+		int x = Mathf.RoundToInt(tile.transform.position.x);
+		int y = Mathf.RoundToInt(tile.transform.position.y);
+
+		string name = TempGrid [x, y].GetComponent<MoveScript> ().getName ();
+
+		int count = 0;
+
+		for (x = 0; x < GridWidth; x++) {
+			if (TempGrid [x, y].GetComponent<MoveScript> ().getName () == name) {
+				count++;
+			} else {
+				count = 0;
+			}
+			if (count >= 3) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool QuickVertCheck(GameObject[,] TempGrid, GameObject tile){
+
+		int x = Mathf.RoundToInt(tile.transform.position.x);
+		int y = Mathf.RoundToInt(tile.transform.position.y);
+
+		string name = TempGrid [x, y].GetComponent<MoveScript> ().getName ();
+
+		int count = 0;
+
+		for (y = 0; y < GridHeight; y++) {
+			if (TempGrid [x, y].GetComponent<MoveScript> ().getName () == name) {
+				count++;
+			} else {
+				count = 0;
+			}
+			if (count >= 3) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public bool checkForPossibleMoves ()
 	{
@@ -1229,21 +1273,16 @@ public class GridManager : MonoBehaviour
 				TempGrid [x, y] = TempGrid [x + 1, y];
 				TempGrid [x + 1, y] = tempTile;
 
-
-
-				List<Vector2>[] matches = getMatches (TempGrid);
-				if (matches [0] != null) {
-					//Debug.Log ("Swap " + x + ":" + y + "with " + (x + 1) + ":" + y);
-
+				if (QuickHorizCheck (TempGrid,tempTile) || QuickVertCheck (TempGrid,tempTile) || QuickVertCheck (TempGrid,TempGrid [x, y])) {
 					//now check that no fat surrounds the two tiles and that they arent cigarettes
 					if (NoFatExists (new Vector2 (x, y), new Vector2 (x + 1, y))
-					    && getTileName (new Vector2 (x, y)) != "ciggy"
-					    && getTileName (new Vector2 (x + 1, y)) != "ciggy") {
-						//Debug.Log ("there are potential HORIZONTAL moves");
+						&& getTileName (new Vector2 (x, y)) != "ciggy"
+						&& getTileName (new Vector2 (x + 1, y)) != "ciggy"
+						&& getTileName (new Vector2 (x, y)) != "beer") {
 						DisplayMoves (Grid [x, y], Grid [x + 1, y]);
 						return true;
 					}
-				} 
+				}
 			}
 		}
 			
@@ -1257,20 +1296,15 @@ public class GridManager : MonoBehaviour
 				TempGrid [x, y] = TempGrid [x, y - 1];
 				TempGrid [x, y - 1] = tempTile;
 
-				List<Vector2>[] matches = getMatches (TempGrid);
-				if (matches [0] != null) {
-					//Debug.Log ("Swap " + x + ":" + y + "with " + x + ":" + (y - 1));
-
+				if (QuickVertCheck (TempGrid,tempTile) || QuickHorizCheck (TempGrid,tempTile) || QuickHorizCheck (TempGrid,TempGrid [x, y])) {
 					//now check that no fat surrounds the two tiles
 					if (NoFatExists (new Vector2 (x, y), new Vector2 (x, y - 1))
-					    && getTileName (new Vector2 (x, y)) != "ciggy"
-					    && getTileName (new Vector2 (x, y - 1)) != "ciggy") {
-						//Debug.Log ("there are potential Vertical moves");
+						&& getTileName (new Vector2 (x, y)) != "ciggy"
+						&& getTileName (new Vector2 (x, y - 1)) != "ciggy"
+						&& getTileName (new Vector2 (x, y)) != "beer") {
 						DisplayMoves (Grid [x, y], Grid [x, y - 1]);
 						return true;
 					}
-				} else {
-					//Debug.Log ("no more Vertical moves");
 				}
 			}
 		}

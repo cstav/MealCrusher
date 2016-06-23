@@ -78,8 +78,8 @@ public class LevelScript : MonoBehaviour {
 		cigOn = true;
 		ingredientsOn = true;
 		ingredientHolders = 5;
-		gridWidth = 9;
-		gridHeight = 9;
+		gridWidth = 8;
+		gridHeight = 8;
 		moves = 20;
 		gridLayout = new int[gridWidth, gridHeight];
 
@@ -202,7 +202,7 @@ public class LevelScript : MonoBehaviour {
 
 	void SetGridLayout(int[,] layout){
 
-		Array.Copy (layout, gridLayout, layout.Length);
+		Array.Copy (layout, gridLayout, gridLayout.Length);
 
 
 	}

@@ -15,7 +15,7 @@ public class GridManager : MonoBehaviour
 	public int GridWidth;
 	public int GridHeight;
 	public GameObject[,] Grid;
-	public int [,] gridLayout;
+	public List<Vector2> gridLayout;
 	//public LayerMask Tiles;
 	GameObject[] TilePrefabs;
 	GameObject[] boosterPrefabs;
@@ -67,9 +67,9 @@ public class GridManager : MonoBehaviour
 		this.ingredientsOn = leveldata.ingredientsOn;
 		GridWidth = leveldata.gridWidth;
 		GridHeight = leveldata.gridHeight;
-		gridLayout = new int[GridWidth, GridHeight];
+		gridLayout = leveldata.GetGridLayout ();
 
-		Array.Copy (leveldata.GetGridLayout(), gridLayout, gridLayout.Length);
+	
 
 
 
@@ -1356,23 +1356,23 @@ public class GridManager : MonoBehaviour
 	void PrintGrid (GameObject[,]  thisGrid)
 	{
 		
-		string gridlayout = "";
+		string grid = "";
 		
 		for (int y = GridHeight - 1; y >= 0; y--) {
 			
-			gridlayout += ("Row " + y + ": ");
+			grid += ("Row " + y + ": ");
 			for (int x = 0; x < GridWidth; x++) {
 				if (thisGrid [x, y] == null) {
-					gridlayout += "-------, ";
+					grid += "-------, ";
 				} else {
-					gridlayout += (thisGrid [x, y].GetComponent<MoveScript> ().getName () + ", ");
+					grid += (thisGrid [x, y].GetComponent<MoveScript> ().getName () + ", ");
 				}
 			}
 			
-			gridlayout += ("\n");
+			grid += ("\n");
 		}
 		
-		Debug.Log (gridlayout);
+		Debug.Log (grid);
 
 	}
 

@@ -17,7 +17,7 @@ public class StoneScript : MonoBehaviour {
 
 	void OnMouseEnter(){
 		iTween.ScaleTo (gameObject, iTween.Hash("x", 0.6f, "y", 0.6f, "time", 0.5f));
-		gameObject.GetComponent<AudioSource> ().volume = 0.5f;
+		gameObject.GetComponent<AudioSource> ().volume = 0.1f;
 		gameObject.GetComponent<AudioSource> ().Play ();
 
 	}

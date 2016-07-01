@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Threading;
+using System.Collections.Generic;
 
 public class MoveScript : MonoBehaviour {
 
 	private GridManager gm;
+	LevelScript leveldata;
 	private string tileName;
 	private float currentAlpha;
 	float decrease = 0.1f;
@@ -12,10 +14,17 @@ public class MoveScript : MonoBehaviour {
 	public bool isSpecialBooster = false;
 	public bool isIngredient = false;
 	public int tileIndex;
+	List<Vector2> gridLayout;
+
+	void Start(){
+		
+	}
 
 	void Awake(){
 
 		gm = GameObject.Find ("GameController").GetComponent<GridManager> ();
+		leveldata = GameObject.Find ("LevelHandler").GetComponent<LevelScript> ();
+		gridLayout = leveldata.GetGridLayout ();
 	}
 		
 
@@ -37,19 +46,30 @@ public class MoveScript : MonoBehaviour {
 
 	//each tile checks how many spots are empty below and moves down that many spot
 	public void GravityCheck(bool lastile){
-		
+
+		int x = Mathf.RoundToInt(gameObject.transform.position.x);
+
 		//when tiles are moved we want to stop them from flashing
 		StopFlashing ();
 
 		int missingTileCount = 0;
 	
+	
 
 		for (int y = Mathf.RoundToInt(transform.position.y); y>=0; y--) {
 
-			RaycastHit2D hit = Physics2D.Raycast (new Vector2(transform.position.x, y), Vector2.zero, 0f);
-			if(!hit){
-				missingTileCount++;
-			}
+
+
+				RaycastHit2D hit = Physics2D.Raycast (new Vector2 (transform.position.x, y), Vector2.zero, 0f);
+				if (!hit) {
+
+
+				if (gridLayout.Contains (new Vector2 (x, y))) {
+					missingTileCount++;
+				}
+					
+				}
+			
 
 		}
 

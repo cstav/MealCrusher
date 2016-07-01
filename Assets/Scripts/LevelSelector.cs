@@ -9,10 +9,10 @@ public class LevelSelector : MonoBehaviour {
 	void Start () {
 	
 		for (int i = 0; i < stones.Length; i++) {
-			stones [i].GetComponent<StoneScript> ().SetLevel (2);
+			stones [i].GetComponent<StoneScript> ().SetLevel (i+2);
 		}
 
-		stones [1].GetComponent<StoneScript> ().SetLevel (3);
+		//stones [1].GetComponent<StoneScript> ().SetLevel (3);
 	}
 
 

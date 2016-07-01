@@ -22,6 +22,9 @@ public class ScoreHandler : MonoBehaviour {
 
 	}
 
+	public int GetScore(){
+		return score;
+	}
 
 	void Start () {
 	

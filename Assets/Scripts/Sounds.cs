@@ -8,11 +8,6 @@ public class Sounds : MonoBehaviour {
 	// Use this for initialization
 	void Awake(){
 		audiosource = gameObject.GetComponent<AudioSource> ();
-	}
-
-
-	void Start () {
-	
 		sounds = new AudioClip[20];
 		sounds[0] = Resources.Load ("Sounds/ciggy") as AudioClip;
 		sounds[1] = Resources.Load ("Sounds/smoosh") as AudioClip;
@@ -26,6 +21,12 @@ public class Sounds : MonoBehaviour {
 		sounds[9] = Resources.Load ("Sounds/raygun") as AudioClip;
 		sounds[10] = Resources.Load ("Sounds/grow") as AudioClip;
 		sounds[11] = Resources.Load ("Sounds/tileDestroy") as AudioClip;
+	}
+
+
+	void Start () {
+	
+	
 
 
 	}

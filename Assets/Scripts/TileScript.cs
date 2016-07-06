@@ -3,7 +3,7 @@ using System.Collections;
 using System.Threading;
 using System.Collections.Generic;
 
-public class MoveScript : MonoBehaviour {
+public class TileScript : MonoBehaviour {
 
 	private GridManager gm;
 	LevelScript leveldata;

@@ -24,7 +24,7 @@ public class PlayerInput : MonoBehaviour
 		bs = BoosterState.dontDestroy;
 		gm = gameObject.GetComponent<GridManager> ();
 		sounds = Camera.main.GetComponent<Sounds> ();
-		movesLeft = leveldata.moves;
+		movesLeft = gm.moves;
 		movesText.text = "MOVES\n" + movesLeft;
 
 	}
@@ -68,7 +68,7 @@ public class PlayerInput : MonoBehaviour
 			//Debug.Log ("hit tile");
 			activeTile = hit.collider.gameObject;
 
-			if (activeTile.GetComponent<MoveScript> ().getName () == "beer" && !leveldata.objectiveBeer) {
+			if (activeTile.GetComponent<TileScript> ().getName () == "beer" && !leveldata.objectiveBeer) {
 				//swap with a cigarette and display feedback
 				gm.CreateCigarette (activeTile.transform.position);
 				gm.UpdateGridArray ();
@@ -79,7 +79,7 @@ public class PlayerInput : MonoBehaviour
 				if (!gm.checkForPossibleMoves ()) {
 					gm.ReplaceGrid ();
 				}
-			} else if (activeTile.GetComponent<MoveScript> ().getName () == "ciggy") {
+			} else if (activeTile.GetComponent<TileScript> ().getName () == "ciggy") {
 				//freeze screen for 3 seconds and display feedback
 				sounds.PlaySound ("stayaway");
 				gm.DisplayFeedback (2);
@@ -190,10 +190,10 @@ public class PlayerInput : MonoBehaviour
 		else if (AreSpecialAndNormalBoosters (tiles [0], tiles [1])) {
 			DecrementMoves ();
 
-			if (tiles [0].GetComponent<MoveScript> ().isBooster) {
-				gm.ReplaceWithBoosters (tiles [0].GetComponent<MoveScript> ().getName ());
+			if (tiles [0].GetComponent<TileScript> ().isBooster) {
+				gm.ReplaceWithBoosters (tiles [0].GetComponent<TileScript> ().getName ());
 			} else {
-				gm.ReplaceWithBoosters (tiles [1].GetComponent<MoveScript> ().getName ());
+				gm.ReplaceWithBoosters (tiles [1].GetComponent<TileScript> ().getName ());
 			}
 			gm.DestroyTile (tiles [0].transform.position, true);
 			gm.DestroyTile (tiles [1].transform.position, true);
@@ -207,11 +207,11 @@ public class PlayerInput : MonoBehaviour
 		else if (CheckForSpecialBooster (tiles [0], tiles [1])) {
 			DecrementMoves ();
 			sounds.PlaySound ("raygun");
-			if (tiles [0].GetComponent<MoveScript> ().isSpecialBooster) {
-				StartCoroutine (gm.DestroyTilesWithName (tiles [1].GetComponent<MoveScript> ().getName ()));
+			if (tiles [0].GetComponent<TileScript> ().isSpecialBooster) {
+				StartCoroutine (gm.DestroyTilesWithName (tiles [1].GetComponent<TileScript> ().getName ()));
 				gm.DestroyTile (tiles [0].transform.position, false);
 			} else {
-				StartCoroutine (gm.DestroyTilesWithName (tiles [0].GetComponent<MoveScript> ().getName ()));
+				StartCoroutine (gm.DestroyTilesWithName (tiles [0].GetComponent<TileScript> ().getName ()));
 				gm.DestroyTile (tiles [1].transform.position, false);
 			}
 		}
@@ -236,9 +236,9 @@ public class PlayerInput : MonoBehaviour
 
 	bool CheckForSpecialBooster (GameObject tile1, GameObject tile2)
 	{
-		if (tile1.GetComponent<MoveScript> ().isSpecialBooster) {
+		if (tile1.GetComponent<TileScript> ().isSpecialBooster) {
 			return true;
-		} else if (tile2.GetComponent<MoveScript> ().isSpecialBooster) {
+		} else if (tile2.GetComponent<TileScript> ().isSpecialBooster) {
 			return true;
 		}
 		return false;
@@ -246,7 +246,7 @@ public class PlayerInput : MonoBehaviour
 
 	bool AreNormalBoosters (GameObject tile1, GameObject tile2)
 	{
-		if (tile1.GetComponent<MoveScript> ().isBooster && tile2.GetComponent<MoveScript> ().isBooster) {
+		if (tile1.GetComponent<TileScript> ().isBooster && tile2.GetComponent<TileScript> ().isBooster) {
 			return true;
 		} else {
 			return false;
@@ -256,7 +256,7 @@ public class PlayerInput : MonoBehaviour
 	bool AreSpecialBoosters (GameObject tile1, GameObject tile2)
 	{
 
-		if (tile1.GetComponent<MoveScript> ().isSpecialBooster && tile2.GetComponent<MoveScript> ().isSpecialBooster) {
+		if (tile1.GetComponent<TileScript> ().isSpecialBooster && tile2.GetComponent<TileScript> ().isSpecialBooster) {
 			return true;
 		} else {
 			return false;
@@ -266,9 +266,9 @@ public class PlayerInput : MonoBehaviour
 	bool AreSpecialAndNormalBoosters (GameObject tile1, GameObject tile2)
 	{
 
-		if (tile1.GetComponent<MoveScript> ().isSpecialBooster && tile2.GetComponent<MoveScript> ().isBooster) {
+		if (tile1.GetComponent<TileScript> ().isSpecialBooster && tile2.GetComponent<TileScript> ().isBooster) {
 			return true;
-		} else if (tile1.GetComponent<MoveScript> ().isBooster && tile2.GetComponent<MoveScript> ().isSpecialBooster) {
+		} else if (tile1.GetComponent<TileScript> ().isBooster && tile2.GetComponent<TileScript> ().isSpecialBooster) {
 			return true;
 		} else {
 			return false;

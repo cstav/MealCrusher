@@ -17,7 +17,7 @@ public class Timer : MonoBehaviour {
 		leveldata = GameObject.Find ("LevelHandler").GetComponent<LevelScript> ();
 		gm = GameObject.Find ("GameController").GetComponent<GridManager> ();
 
-		seconds = leveldata.GetTime();
+		seconds = gm.time;
 
 		Debug.Log ("Time Left: " + seconds);
 		setTimerText ();

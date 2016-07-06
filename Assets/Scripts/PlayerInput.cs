@@ -168,11 +168,12 @@ public class PlayerInput : MonoBehaviour
 
 	void FinishedSwapping (List<GameObject> tiles)
 	{
-		DecrementMoves ();
+		
 		gm.UpdateGridArray ();
 
 		//if both tiles are normal boosters
 		if (AreNormalBoosters (tiles [0], tiles [1])) {
+			DecrementMoves ();
 			bs = BoosterState.Destroy;
 			Grow (tiles [0]);
 			gm.Grid [Mathf.RoundToInt (tiles [0].transform.position.x), Mathf.RoundToInt (tiles [0].transform.position.y)] = null;
@@ -180,12 +181,14 @@ public class PlayerInput : MonoBehaviour
 
 		//if both are special boosters (waterbottles)
 		else if (AreSpecialBoosters (tiles [0], tiles [1])) {
+			DecrementMoves ();
 			gm.DestroyGridQuarter (tiles[1].transform.position);
 			gm.Invoke ("ReplaceTiles", 0.3f);
 		}
 
 		//if one is a special booster and the other is a normal booster
 		else if (AreSpecialAndNormalBoosters (tiles [0], tiles [1])) {
+			DecrementMoves ();
 
 			if (tiles [0].GetComponent<MoveScript> ().isBooster) {
 				gm.ReplaceWithBoosters (tiles [0].GetComponent<MoveScript> ().getName ());
@@ -202,6 +205,7 @@ public class PlayerInput : MonoBehaviour
 
 		//if only one is a special booster and other is regular tile
 		else if (CheckForSpecialBooster (tiles [0], tiles [1])) {
+			DecrementMoves ();
 			sounds.PlaySound ("raygun");
 			if (tiles [0].GetComponent<MoveScript> ().isSpecialBooster) {
 				StartCoroutine (gm.DestroyTilesWithName (tiles [1].GetComponent<MoveScript> ().getName ()));
@@ -223,6 +227,7 @@ public class PlayerInput : MonoBehaviour
 				activeTile = null;
 				gm.SwapBack (tiles [0], tiles [1]); //swap back
 			} else {
+				DecrementMoves ();
 				StartCoroutine (gm.Check ());
 			}
 		}
@@ -289,7 +294,7 @@ public class PlayerInput : MonoBehaviour
 			movesText.text = "MOVES\n" + movesLeft;
 		}
 		if(movesLeft == 0 && !leveldata.gameEnded) {
-			leveldata.OutOfMoves ();
+			gm.outOfMoves = true;
 		}
 
 

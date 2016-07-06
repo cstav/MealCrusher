@@ -50,6 +50,8 @@ public class GridManager : MonoBehaviour
 	public bool cigSpawnAllowed = false;
 	int boosterCount = 0;
 	int specBoosterCount = 0;
+	public bool timesUp = false;
+	public bool outOfMoves = false;
 
 
 
@@ -446,7 +448,9 @@ public class GridManager : MonoBehaviour
 				CreateCigarette (new Vector2 (x, y));
 			} else {
 					
-				int tileType = gridContent [x, y];
+				//int tileType = gridContent [x, y];
+				int tileType = UnityEngine.Random.Range(0,5);
+
 				GameObject tile = Instantiate (TilePrefabs [tileType], new Vector2 (x, y), Quaternion.identity) as GameObject;
 				tile.GetComponent<MoveScript> ().tileIndex = tileType;
 
@@ -1301,23 +1305,31 @@ public class GridManager : MonoBehaviour
 			playerinput.currentState = GameState.None;
 
 			//check if target has been reached so they can pass the level
-			if (scorehandler.GetScore () >= leveldata.target && !leveldata.gameEnded) {
+			if (((scorehandler.GetScore () >= leveldata.target && outOfMoves)
+				|| (scorehandler.GetScore () >= leveldata.target && timesUp)) && !leveldata.gameEnded) {
 				leveldata.LevelPassed ();
 			}
-			if (boosterCount >= leveldata.boostersNeeded && !leveldata.gameEnded) {
+
+			else if ((boosterCount >= leveldata.boostersNeeded && outOfMoves) && !leveldata.gameEnded) {
 				leveldata.LevelPassed ();
 			}
-			if (specBoosterCount >= leveldata.specBoostersNeeded && !leveldata.gameEnded) {
+			else if (specBoosterCount >= leveldata.specBoostersNeeded && outOfMoves && !leveldata.gameEnded) {
 				leveldata.LevelPassed ();
 			}
-			if (fatLeft <= 0 && leveldata.objectiveFat && !leveldata.gameEnded) {
+			else if (fatLeft <= 0 && leveldata.objectiveFat && !leveldata.gameEnded) {
 				leveldata.LevelPassed ();
 			}
-			if (beersLeft <= 0 && leveldata.objectiveBeer && !leveldata.gameEnded) {
+			else if (beersLeft <= 0 && leveldata.objectiveBeer && !leveldata.gameEnded) {
 				leveldata.LevelPassed ();
 			}
-			if (cigCount <= 0 && leveldata.objectiveCiggy && !leveldata.gameEnded) {
+			else if (cigCount <= 0 && leveldata.objectiveCiggy && !leveldata.gameEnded) {
 				leveldata.LevelPassed ();
+			}
+			else if (outOfMoves && !leveldata.gameEnded) {
+				leveldata.OutOfMoves ();
+			}
+			else if (timesUp && !leveldata.gameEnded) {
+				leveldata.TimesUp ();
 			}
 
 			Debug.Log ("beeers left: " + beersLeft);
@@ -1680,7 +1692,8 @@ public enum GameState
 	Animating,
 	selectionStarted,
 	swappingTiles,
-	destroyable
+	destroyable,
+	GameOver
 }
 
 public enum BoosterState

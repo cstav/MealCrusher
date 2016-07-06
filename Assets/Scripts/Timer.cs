@@ -7,13 +7,15 @@ public class Timer : MonoBehaviour {
 	public Text timeTF;
 	LevelScript leveldata;
 	int seconds;
+	GridManager gm;
+	public GameState currentState;
 
 
 	// Use this for initialization
 	void Start () {
 
 		leveldata = GameObject.Find ("LevelHandler").GetComponent<LevelScript> ();
-
+		gm = GameObject.Find ("GameController").GetComponent<GridManager> ();
 
 		seconds = leveldata.GetTime();
 
@@ -32,9 +34,11 @@ public class Timer : MonoBehaviour {
 			seconds--;
 			setTimerText ();
 		} else {
-			CancelInvoke ("ReduceTime");
 			if (!leveldata.gameEnded) {
-				leveldata.TimesUp ();
+				gm.timesUp = true;
+				if (currentState == GameState.None) {
+					leveldata.TimesUp ();
+				}
 			}
 		}
 

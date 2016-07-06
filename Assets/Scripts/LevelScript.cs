@@ -32,6 +32,7 @@ public class LevelScript : MonoBehaviour {
 	public bool gameEnded = false;
 
 
+
 	//extremely high number that is impossible to reach
 	const int UNATTAINABLE = 1000000;
 
@@ -46,6 +47,7 @@ public class LevelScript : MonoBehaviour {
 
 	//scripts
 	ScoreHandler scorehandler;
+	PlayerInput playerinput;
 
 
 
@@ -66,6 +68,7 @@ public class LevelScript : MonoBehaviour {
 
 
 		scorehandler = GameObject.Find ("scoretext").GetComponent<ScoreHandler> ();
+		playerinput = GameObject.Find ("GameController").GetComponent<PlayerInput>();
 	}
 
 
@@ -631,6 +634,7 @@ public class LevelScript : MonoBehaviour {
 		iTween.MoveTo (tu, iTween.Hash("y", 3.39, "time", 1));
 		Invoke ("CreateMenuButtons", 0.6f);
 		gameEnded = true;
+		playerinput.currentState = GameState.Animating;
 	}
 
 	public void OutOfMoves(){
@@ -640,7 +644,7 @@ public class LevelScript : MonoBehaviour {
 		Invoke ("CreateMenuButtons", 0.6f);
 		Debug.Log ("OUT OF MOVESSS");
 		gameEnded = true;
-
+		playerinput.currentState = GameState.Animating;
 	}
 
 	public void LevelPassed(){
@@ -650,6 +654,7 @@ public class LevelScript : MonoBehaviour {
 		iTween.MoveTo (lp, iTween.Hash("y", 3.39, "time", 1));
 		Invoke ("CreateMenuButtons", 0.6f);
 		gameEnded = true;
+		playerinput.currentState = GameState.Animating;
 	}
 
 

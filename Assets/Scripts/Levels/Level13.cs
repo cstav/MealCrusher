@@ -41,6 +41,7 @@ public class Level13 : GridManager {
 
 		if ((HoldersAreFull() && outOfMoves) && !gameEnded) {
 			LevelPassed ();
+			GameManager.instance.UnlockLevel (14);
 		} else if (outOfMoves) {
 			OutOfMoves ();
 		}

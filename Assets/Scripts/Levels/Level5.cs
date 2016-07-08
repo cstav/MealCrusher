@@ -30,6 +30,7 @@ public class Level5 : GridManager {
 
 		if ((scorehandler.GetScore () >= target && timesUp) && !gameEnded) {
 			LevelPassed ();
+			GameManager.instance.UnlockLevel (6);
 		}
 		else if(timesUp && !gameEnded){
 			TimesUp ();

@@ -29,6 +29,7 @@ public class Level23 : GridManager {
 
 		if ((boosterFromBread >= boostersNeeded && scorehandler.GetScore() >= target && outOfMoves) && !gameEnded) {
 			LevelPassed ();
+			GameManager.instance.UnlockLevel (24);
 		} else if (outOfMoves && !gameEnded) {
 			OutOfMoves ();
 		}

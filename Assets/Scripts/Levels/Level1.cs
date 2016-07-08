@@ -29,6 +29,7 @@ public class Level1 : GridManager {
 
 		if ((scorehandler.GetScore () >= target && outOfMoves) && !gameEnded) {
 			LevelPassed ();
+			GameManager.instance.UnlockLevel (2);
 		}
 		else if(outOfMoves){
 			OutOfMoves ();

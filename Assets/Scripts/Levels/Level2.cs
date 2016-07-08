@@ -28,6 +28,7 @@ public class Level2 : GridManager {
 
 		if ((boostersDestroyed >= boostersNeeded && outOfMoves) && !gameEnded) {
 			LevelPassed ();
+			GameManager.instance.UnlockLevel (3);
 		} else if (outOfMoves) {
 			OutOfMoves ();
 		}

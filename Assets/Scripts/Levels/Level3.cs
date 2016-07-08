@@ -4,8 +4,6 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 
 public class Level3 : GridManager {
-	int boostersNeeded;
-	int target;
 	List<GameObject> ingredientsList;
 
 
@@ -41,6 +39,7 @@ public class Level3 : GridManager {
 
 		if ((HoldersAreFull() && outOfMoves) && !gameEnded) {
 			LevelPassed ();
+			GameManager.instance.UnlockLevel (4);
 		} else if (outOfMoves) {
 			OutOfMoves ();
 		}
@@ -87,16 +86,10 @@ public class Level3 : GridManager {
 				CreateIngredient (new Vector2(x,y));
 			}
 			else {
-
-				//int tileType = gridContent [x, y];
 				int tileType = UnityEngine.Random.Range(0,5);
-
 				GameObject tile = Instantiate (TilePrefabs [tileType], new Vector2 (x, y), Quaternion.identity) as GameObject;
 				tile.GetComponent<TileScript> ().tileIndex = tileType;
-
 				Grid [x, y] = tile;
-
-				//Assign the tile a name
 				Grid [x, y].GetComponent<TileScript> ().setName (tileColours [tileType]);
 			}
 			yield return new WaitForSeconds (.02f);

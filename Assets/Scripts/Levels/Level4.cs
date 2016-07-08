@@ -12,6 +12,7 @@ public class Level4 : GridManager {
 
 	void init(){
 
+		dropTime = 0;
 
 		GridWidth = 8;
 		GridHeight = 8;
@@ -26,6 +27,7 @@ public class Level4 : GridManager {
 
 		if ((specBoostersDestroyed >= specialBoostersNeeded && outOfMoves) && !gameEnded) {
 			LevelPassed ();
+			GameManager.instance.UnlockLevel (5);
 		} else if (outOfMoves) {
 			OutOfMoves ();
 		}

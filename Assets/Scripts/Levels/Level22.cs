@@ -41,6 +41,7 @@ public class Level22 : GridManager {
 
 		if ((fatLeft <=0 && outOfMoves) && !gameEnded) {
 			LevelPassed ();
+			GameManager.instance.UnlockLevel (23);
 		}
 		else if(outOfMoves && !gameEnded){
 			OutOfMoves ();

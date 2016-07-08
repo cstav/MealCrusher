@@ -45,6 +45,7 @@ public class Level7 : GridManager {
 
 		if ((fatLeft <=0 && outOfMoves) && !gameEnded) {
 			LevelPassed ();
+			GameManager.instance.UnlockLevel (8);
 		}
 		else if(outOfMoves){
 			OutOfMoves ();

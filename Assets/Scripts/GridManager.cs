@@ -27,7 +27,7 @@ public class GridManager : MonoBehaviour
 	public GameObject[,] fatGrid;
 	public GameObject[,] junkFoodGrid;
 	GameObject fattyBlock;
-	GameObject hotdog;
+	protected GameObject hotdog;
 	protected GameObject candy;
 	GameObject ingredientHolder;
 	List<Vector3> holderPositions;

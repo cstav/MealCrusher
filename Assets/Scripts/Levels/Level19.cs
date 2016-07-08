@@ -24,6 +24,7 @@ public class Level19 : GridManager {
 
 		if ((beersLeft <=0 && outOfMoves) && !gameEnded) {
 			LevelPassed ();
+			GameManager.instance.UnlockLevel (20);
 		}
 		else if(outOfMoves){
 			OutOfMoves ();

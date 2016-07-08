@@ -39,8 +39,9 @@ public class Level20 : GridManager {
 
 		if ((HoldersAreFull() && timesUp) && !gameEnded) {
 			LevelPassed ();
+			GameManager.instance.UnlockLevel (21);
 		} else if (timesUp && !gameEnded ) {
-			OutOfMoves ();
+			TimesUp ();
 		}
 
 	}

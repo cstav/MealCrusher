@@ -34,6 +34,7 @@ public class Level8 : GridManager {
 
 		if ((cigCount <=0 && outOfMoves) && !gameEnded) {
 			LevelPassed ();
+			GameManager.instance.UnlockLevel (9);
 		}
 		else if(outOfMoves){
 			OutOfMoves ();

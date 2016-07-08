@@ -5,7 +5,6 @@ using UnityEngine.UI;
 public class Timer : MonoBehaviour {
 
 	public Text timeTF;
-	LevelScript leveldata;
 	int seconds;
 	GridManager gm;
 	public GameState currentState;
@@ -14,7 +13,7 @@ public class Timer : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		leveldata = GameObject.Find ("LevelHandler").GetComponent<LevelScript> ();
+
 		gm = GameObject.Find ("GameController").GetComponent<GridManager> ();
 
 		seconds = gm.time;
@@ -34,11 +33,9 @@ public class Timer : MonoBehaviour {
 			seconds--;
 			setTimerText ();
 		} else {
-			if (!leveldata.gameEnded) {
+			if (!gm.gameEnded) {
 				gm.timesUp = true;
-				if (currentState == GameState.None) {
-					leveldata.TimesUp ();
-				}
+				gm.CheckCriteria ();
 			}
 		}
 

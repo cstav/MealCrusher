@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class Level11 : GridManager {
 	int boostersNeeded;
 	int specialBoostersNeeded;
-	string gameOverMessage;
 	int target;
 
 
@@ -15,21 +15,43 @@ public class Level11 : GridManager {
 
 	void init(){
 
+
 		GridWidth = 8;
 		GridHeight = 8;
-		target = 7000;
-		moves = 20;
+		moves = 30;
+		gameoverMessage = "Level One Game Over Message";
+		fatOn = true;
+
+		int[,] fatPos =  {
+
+			{ 0, 0, 0, 0, 0, 1, 0, 0, 0},
+			{ 0, 0, 0, 0, 1, 1, 0, 0, 0 },
+			{ 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+			{ 0, 0, 1, 1, 1, 1, 0, 0, 0 },
+			{ 0, 0, 1, 1, 1, 1, 0, 0, 0 },
+			{ 0, 0, 0, 1, 1, 1, 0, 0, 0 },
+			{ 0, 0, 0, 0, 1, 1, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 1, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+		};
+
+		fatPositions = fatPos;
 
 
 	}
 
 	public override void CheckCriteria(){
 
-		if (fatLeft <= 0) {
-			//leveldata.LevelPassed ();
+		if ((fatLeft <=0 && outOfMoves) && !gameEnded) {
+			LevelPassed ();
+		}
+		else if(outOfMoves){
+			OutOfMoves ();
 		}
 			
 		
 	}
+
+
 
 }

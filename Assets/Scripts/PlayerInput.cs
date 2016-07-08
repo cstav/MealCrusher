@@ -19,7 +19,7 @@ public class PlayerInput : MonoBehaviour
 
 	void Start ()
 	{
-		leveldata = GameObject.Find ("LevelHandler").GetComponent<LevelScript> ();
+
 		scorehandler = GameObject.Find ("scoretext").GetComponent<ScoreHandler> ();
 		bs = BoosterState.dontDestroy;
 		gm = gameObject.GetComponent<GridManager> ();
@@ -68,7 +68,7 @@ public class PlayerInput : MonoBehaviour
 			//Debug.Log ("hit tile");
 			activeTile = hit.collider.gameObject;
 
-			if (activeTile.GetComponent<TileScript> ().getName () == "beer" && !leveldata.objectiveBeer) {
+			if (activeTile.GetComponent<TileScript> ().getName () == "beer") {
 				//swap with a cigarette and display feedback
 				gm.CreateCigarette (activeTile.transform.position);
 				gm.UpdateGridArray ();
@@ -293,7 +293,7 @@ public class PlayerInput : MonoBehaviour
 		if (movesLeft >= 0) {
 			movesText.text = "MOVES\n" + movesLeft;
 		}
-		if(movesLeft == 0 && !leveldata.gameEnded) {
+		if(movesLeft == 0 && !gm.gameEnded) {
 			gm.outOfMoves = true;
 		}
 

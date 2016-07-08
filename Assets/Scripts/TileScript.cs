@@ -6,7 +6,6 @@ using System.Collections.Generic;
 public class TileScript : MonoBehaviour {
 
 	private GridManager gm;
-	LevelScript leveldata;
 	private string tileName;
 	private float currentAlpha;
 	float decrease = 0.1f;
@@ -23,8 +22,7 @@ public class TileScript : MonoBehaviour {
 	void Awake(){
 
 		gm = GameObject.Find ("GameController").GetComponent<GridManager> ();
-		leveldata = GameObject.Find ("LevelHandler").GetComponent<LevelScript> ();
-		gridLayout = leveldata.GetGridLayout ();
+		gridLayout = gm.GetGridLayout ();
 	}
 		
 

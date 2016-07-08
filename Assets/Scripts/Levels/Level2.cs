@@ -17,7 +17,7 @@ public class Level2 : GridManager {
 
 		GridWidth = 8;
 		GridHeight = 8;
-		moves = 3; //14
+		moves = 14; //14
 		boostersNeeded = 1;
 		gameoverMessage = "Level Two Game Over Message";
 

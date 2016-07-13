@@ -49,6 +49,16 @@ EditorBuildSettings:
     path: Assets/Scenes/scene19.unity
   - enabled: 1
     path: Assets/Scenes/scene20.unity
+  - enabled: 1
+    path: Assets/Scenes/scene21.unity
+  - enabled: 1
+    path: Assets/Scenes/scene22.unity
+  - enabled: 1
+    path: Assets/Scenes/scene23.unity
+  - enabled: 1
+    path: Assets/Scenes/scene24.unity
+  - enabled: 1
+    path: Assets/Scenes/scene25.unity
   - enabled: 0
     path: Assets/Scenes/scene12.unity
   - enabled: 0

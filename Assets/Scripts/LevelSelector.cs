@@ -1,14 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class LevelSelector : MonoBehaviour
 {
-
+	
 	private GameObject selectedStone;
 	public GameObject[] stones;
+	bool locked = false;
 	// Use this for initialization
 	void Start ()
 	{
+		
 	
 		for (int i = 0; i < 50; i++) {
 			int level = i;
@@ -17,16 +20,22 @@ public class LevelSelector : MonoBehaviour
 			int week = level / GameManager.instance.levelsPerWeek;
 			int weekLevel = level % GameManager.instance.levelsPerWeek;
 
-			if (GameManager.instance.levelState [week, weekLevel] == false) {
-				Destroy (stones [i]);
-			}
+			Debug.Log ("Current Level: " + i);
+
+			stones [i].GetComponent<StoneScript>().scoreText.text = ""+ GameManager.instance.GetHighscore (level);
+
+//			if (GameManager.instance.levelState [week, weekLevel] == locked) {
+//				Destroy (stones [i]);
+//			}
 		}
 
 
 		//stones [1].GetComponent<StoneScript> ().SetLevel (3);
 	}
 
-
+	void UpdateScoreLabel(GameObject stone){
+		
+	}
 	
 	// Update is called once per frame
 	void Update ()

@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour {
 	public static GameManager instance = null;
 	public int[,] highscores;
 	public int currentWeek;
-	public int prevViewedWeek = 0;
+	public int prevViewedWeek = 1;
 	public bool[,] levelState; //locked or unlocked
 	public List<Vector2> unlockedLevels; //retrieve from database
 
@@ -139,12 +139,39 @@ public class GameManager : MonoBehaviour {
 	
 	}
 
-	public void UpdateHighscore(int week, int weekLevel, int score){
+	public int GetHighscore(int level){
+
+
+		int week = level / levelsPerWeek;
+		int weekLevel = level % levelsPerWeek;
+
+		return highscores [week, weekLevel];
+	}
+
+	public void UpdateHighscore(int level, int score){
+
+		level--; //because we starting at 0
+
+		int week = level / levelsPerWeek;
+		int weekLevel = level % levelsPerWeek;
 
 		highscores [week, weekLevel] = score;
 
 	}
-	
+
+	public string GetWeeklyScore(int week){
+
+		int weeklyscore = 0;
+
+		Debug.Log ("week: " + week);
+
+		for (int i = 0; i < levelsPerWeek; i++) {
+			weeklyscore += highscores [week, i];
+		}
+
+		return "" + weeklyscore;
+	}
+
 	// Update is called once per frame
 	void Update () {
 	

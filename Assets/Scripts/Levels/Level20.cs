@@ -19,7 +19,7 @@ public class Level20 : GridManager {
 		GridHeight = 8;
 		time = 35; 
 		ingredientsOn = true;
-		ingredientHolders = 5;
+		ingredientHolders = 4;
 		gameoverMessage = "Level twenty Game Over Message";
 
 
@@ -28,10 +28,10 @@ public class Level20 : GridManager {
 	void SetupFruitList(){
 
 		fruitList.Add (TilePrefabs [8]);
+		fruitList.Add (TilePrefabs [5]);
+		fruitList.Add (TilePrefabs [7]);
 		fruitList.Add (TilePrefabs [8]);
-		fruitList.Add (TilePrefabs [8]);
-		fruitList.Add (TilePrefabs [8]);
-		fruitList.Add (TilePrefabs [8]);
+
 
 	}
 
@@ -40,8 +40,10 @@ public class Level20 : GridManager {
 		if ((HoldersAreFull() && timesUp) && !gameEnded) {
 			LevelPassed ();
 			GameManager.instance.UnlockLevel (21);
+			UpdateHS ();
 		} else if (timesUp && !gameEnded ) {
 			TimesUp ();
+			UpdateHS ();
 		}
 
 	}
@@ -71,7 +73,7 @@ public class Level20 : GridManager {
 		fruitPositions.Add (new Vector2(3,3));
 		fruitPositions.Add (new Vector2(4,3));
 		fruitPositions.Add (new Vector2(5,3));
-		fruitPositions.Add (new Vector2(6,3));
+
 
 		playerinput.currentState = GameState.Animating;
 		Grid = new GameObject[GridWidth, GridHeight];

@@ -28,8 +28,10 @@ public class Level4 : GridManager {
 		if ((specBoostersDestroyed >= specialBoostersNeeded && outOfMoves) && !gameEnded) {
 			LevelPassed ();
 			GameManager.instance.UnlockLevel (5);
+			UpdateHS ();
 		} else if (outOfMoves) {
 			OutOfMoves ();
+			UpdateHS ();
 		}
 
 	}

@@ -37,9 +37,11 @@ public class Level10 : GridManager {
 		if ((cigCount <=0 && timesUp) && !gameEnded) {
 			LevelPassed ();
 			GameManager.instance.UnlockLevel (11);
+			UpdateHS ();
 		}
 		else if(timesUp && !gameEnded){
 			OutOfMoves ();
+			UpdateHS ();
 		}
 	}
 }

@@ -7,6 +7,7 @@ public class MoveCamera : MonoBehaviour {
 	int currentWeek;
 	List<Vector2> weeks;
 	public Text weekText;
+	public Text weeklyScore;
 	// Use this for initialization
 	void Start () {
 
@@ -26,6 +27,7 @@ public class MoveCamera : MonoBehaviour {
 		weeks.Add(new Vector2 (-13.71f,-4.8f));
 
 		MoveInstantlyTo (weeks[currentWeek]);
+		weeklyScore.text = GameManager.instance.GetWeeklyScore (currentWeek);
 
 	}
 		
@@ -57,7 +59,10 @@ public class MoveCamera : MonoBehaviour {
 		}
 		Debug.Log ("prev");
 		MoveTo (weeks[currentWeek]);
-		GameManager.instance.prevViewedWeek = currentWeek;
+
+		weeklyScore.text = GameManager.instance.GetWeeklyScore (currentWeek);
+
+		GameManager.instance.SaveMapPosition (currentWeek);
 	}
 
 	public void prevLevel(){
@@ -68,7 +73,8 @@ public class MoveCamera : MonoBehaviour {
 		}
 		Debug.Log ("prev");
 		MoveTo (weeks[currentWeek]);
-		GameManager.instance.prevViewedWeek = currentWeek;
+		GameManager.instance.SaveMapPosition (currentWeek);
+		weeklyScore.text = GameManager.instance.GetWeeklyScore (currentWeek);
 	}
 
 	public void setWeek(){

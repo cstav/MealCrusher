@@ -63,9 +63,11 @@ public class Level18 : GridManager {
 		if ((fatLeft <=0 && outOfMoves) && !gameEnded) {
 			LevelPassed ();
 			GameManager.instance.UnlockLevel (19);
+			UpdateHS ();
 		}
 		else if(outOfMoves){
 			OutOfMoves ();
+			UpdateHS ();
 		}
 			
 		

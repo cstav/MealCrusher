@@ -143,19 +143,20 @@ public class GridManager : MonoBehaviour
 
 	public void LoadAssets ()
 	{
+		string folder = "tims";
 
-		cigaretteTile = Resources.Load ("cigaretteIcon", typeof(GameObject)) as GameObject;
+		cigaretteTile = Resources.Load (folder + "/cigaretteIcon", typeof(GameObject)) as GameObject;
 		fattyBlock = Resources.Load ("fatIcon", typeof(GameObject)) as GameObject;
 		boosterPrefabs = new GameObject[6];
-		boosterPrefabs [0] = Resources.Load ("boosterPrefabs/strawberry-glowing", typeof(GameObject)) as GameObject;
-		boosterPrefabs [1] = Resources.Load ("boosterPrefabs/fish-glow", typeof(GameObject)) as GameObject;
-		boosterPrefabs [2] = Resources.Load ("boosterPrefabs/cheese-glow", typeof(GameObject)) as GameObject;
-		boosterPrefabs [3] = Resources.Load ("boosterPrefabs/carrot-glow", typeof(GameObject)) as GameObject;
-		boosterPrefabs [4] = Resources.Load ("boosterPrefabs/bread-glow", typeof(GameObject)) as GameObject;
-		boosterPrefabs [5] = Resources.Load ("boosterPrefabs/water", typeof(GameObject)) as GameObject;
+		boosterPrefabs [0] = Resources.Load (folder + "/boosterPrefabs/strawberry-glowing", typeof(GameObject)) as GameObject;
+		boosterPrefabs [1] = Resources.Load (folder + "/boosterPrefabs/fish-glow", typeof(GameObject)) as GameObject;
+		boosterPrefabs [2] = Resources.Load (folder + "/boosterPrefabs/cheese-glow", typeof(GameObject)) as GameObject;
+		boosterPrefabs [3] = Resources.Load (folder + "/boosterPrefabs/carrot-glow", typeof(GameObject)) as GameObject;
+		boosterPrefabs [4] = Resources.Load (folder + "/boosterPrefabs/bread-glow", typeof(GameObject)) as GameObject;
+		boosterPrefabs [5] = Resources.Load (folder + "/boosterPrefabs/water", typeof(GameObject)) as GameObject;
 		explosion = Resources.Load ("explosion", typeof(GameObject)) as GameObject;
-		hotdog = Resources.Load ("hotdog") as GameObject;
-		candy = Resources.Load ("candy") as GameObject;
+		hotdog = Resources.Load (folder + "/hotdog") as GameObject;
+		candy = Resources.Load (folder + "/candy") as GameObject;
 		ingredientHolder = Resources.Load ("holder") as GameObject;
 		scorePrefabs = new GameObject[8];
 		scorePrefabs [0] = Resources.Load ("points/20") as GameObject;
@@ -166,19 +167,22 @@ public class GridManager : MonoBehaviour
 		scorePrefabs [5] = Resources.Load ("points/1500") as GameObject;
 		scorePrefabs [6] = Resources.Load ("points/2000") as GameObject;
 		scorePrefabs [7] = Resources.Load ("points/5000") as GameObject;
-		TilePrefabs = new GameObject[12];
-		TilePrefabs [0] = Resources.Load ("tiles/strawberry") as GameObject;
-		TilePrefabs [1] = Resources.Load ("tiles/fish") as GameObject;
-		TilePrefabs [2] = Resources.Load ("tiles/cheese") as GameObject;
-		TilePrefabs [3] = Resources.Load ("tiles/carrot") as GameObject;
-		TilePrefabs [4] = Resources.Load ("tiles/bread") as GameObject;
-		TilePrefabs [5] = Resources.Load ("tiles/raspberry") as GameObject;
-		TilePrefabs [6] = Resources.Load ("tiles/aubergine") as GameObject;
-		TilePrefabs [7] = Resources.Load ("tiles/broccoli") as GameObject;
-		TilePrefabs [8] = Resources.Load ("tiles/watermelon") as GameObject;
-		TilePrefabs [9] = Resources.Load ("tiles/beer") as GameObject;
-		TilePrefabs [10] = Resources.Load ("tiles/redfish") as GameObject;
-		TilePrefabs [11] = Resources.Load ("tiles/nut") as GameObject;
+		TilePrefabs = new GameObject[15];
+		TilePrefabs [0] = Resources.Load (folder + "/strawberry") as GameObject;
+		TilePrefabs [1] = Resources.Load (folder + "/fish") as GameObject;
+		TilePrefabs [2] = Resources.Load (folder + "/cheese") as GameObject;
+		TilePrefabs [3] = Resources.Load (folder + "/carrot") as GameObject;
+		TilePrefabs [4] = Resources.Load (folder + "/bread") as GameObject;
+		TilePrefabs [5] = Resources.Load (folder + "/raspberry") as GameObject;
+		TilePrefabs [6] = Resources.Load (folder + "/aubergine") as GameObject;
+		TilePrefabs [7] = Resources.Load (folder + "/broccoli") as GameObject;
+		TilePrefabs [8] = Resources.Load (folder + "/watermelon") as GameObject;
+		TilePrefabs [9] = Resources.Load (folder + "/beer") as GameObject;
+		TilePrefabs [10] = Resources.Load (folder + "/tuna") as GameObject;
+		TilePrefabs [11] = Resources.Load (folder + "/nut") as GameObject;
+		TilePrefabs [12] = Resources.Load (folder + "/salmon") as GameObject;
+		TilePrefabs [13] = Resources.Load (folder + "/sardines") as GameObject;
+		TilePrefabs [14] = Resources.Load (folder + "/trout") as GameObject;
 		feedback = new GameObject[3];
 		feedback [0] = Resources.Load ("feedback/nicework") as GameObject;
 		feedback [1] = Resources.Load ("feedback/oops") as GameObject;
@@ -192,6 +196,12 @@ public class GridManager : MonoBehaviour
 		scoretext = Resources.Load ("Score Text", typeof(Text)) as Text;
 		LEVELPASSED = Resources.Load ("LEVEL PASSED", typeof(GameObject)) as GameObject;
 		OUTOFMOVES = Resources.Load ("OUT OF MOVES", typeof(GameObject)) as GameObject;
+	}
+
+	protected void UpdateHS(){
+		if (scorehandler.GetScore () > GameManager.instance.GetHighscore (Application.loadedLevel - 1)) {
+			GameManager.instance.UpdateHighscore (Application.loadedLevel - 1, scorehandler.GetScore ());
+		}
 	}
 
 	public void CreateIngredientHolders (int amount)

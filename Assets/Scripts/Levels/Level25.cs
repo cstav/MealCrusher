@@ -73,9 +73,11 @@ public class Level25 : GridManager {
 		if ((fatLeft <=0 && beersLeft <=0 && timesUp) && !gameEnded) {
 			LevelPassed ();
 			GameManager.instance.UnlockLevel (26);
+			UpdateHS ();
 		}
 		else if(timesUp && !gameEnded){
 			TimesUp ();
+			UpdateHS ();
 		}
 			
 		

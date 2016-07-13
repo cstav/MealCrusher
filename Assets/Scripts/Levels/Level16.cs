@@ -28,8 +28,10 @@ public class Level16 : GridManager {
 		if ((match5strawbs >= boostersNeeded) && !gameEnded) {
 			LevelPassed ();
 			GameManager.instance.UnlockLevel (17);
+			UpdateHS ();
 		} else if (outOfMoves) {
 			OutOfMoves ();
+			UpdateHS ();
 		}
 	
 	}

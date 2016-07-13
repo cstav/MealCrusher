@@ -40,8 +40,10 @@ public class Level3 : GridManager {
 		if ((HoldersAreFull() && outOfMoves) && !gameEnded) {
 			LevelPassed ();
 			GameManager.instance.UnlockLevel (4);
+			UpdateHS ();
 		} else if (outOfMoves) {
 			OutOfMoves ();
+			UpdateHS ();
 		}
 
 	}

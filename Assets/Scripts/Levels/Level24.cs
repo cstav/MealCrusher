@@ -27,8 +27,10 @@ public class Level24 : GridManager {
 		if ((specBoostersCreated >= specialBoostersNeeded && outOfMoves) && !gameEnded) {
 			LevelPassed ();
 			GameManager.instance.UnlockLevel (25);
+			UpdateHS ();
 		} else if (outOfMoves && !gameEnded) {
 			OutOfMoves ();
+			UpdateHS ();
 		}
 
 	}

@@ -30,10 +30,10 @@ public class Level13 : GridManager {
 	void SetupFishList(){
 
 		fishList.Add (TilePrefabs [10]);
-		fishList.Add (TilePrefabs [10]);
-		fishList.Add (TilePrefabs [10]);
-		fishList.Add (TilePrefabs [10]);
-		fishList.Add (TilePrefabs [10]);
+		fishList.Add (TilePrefabs [12]);
+		fishList.Add (TilePrefabs [13]);
+		fishList.Add (TilePrefabs [14]);
+		fishList.Add (TilePrefabs [12]);
 
 	}
 
@@ -42,8 +42,10 @@ public class Level13 : GridManager {
 		if ((HoldersAreFull() && outOfMoves) && !gameEnded) {
 			LevelPassed ();
 			GameManager.instance.UnlockLevel (14);
+			UpdateHS ();
 		} else if (outOfMoves) {
 			OutOfMoves ();
+			UpdateHS ();
 		}
 
 	}

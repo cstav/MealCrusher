@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class StoneScript : MonoBehaviour {
 
+	public Text scoreText;
 	int level = 0;
 	// Use this for initialization
 
@@ -26,8 +28,10 @@ public class StoneScript : MonoBehaviour {
 		iTween.ScaleTo (gameObject, iTween.Hash("x", 0.4f, "y", 0.4f, "time", 0.5f));
 	}
 
-	void Start () {
+	void Awake () {
 	
+		scoreText = gameObject.GetComponentInChildren<Text> ();
+
 	}
 	
 	// Update is called once per frame

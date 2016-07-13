@@ -32,6 +32,7 @@ public class LevelScript : MonoBehaviour {
 	public bool gameEnded = false;
 
 
+
 	//extremely high number that is impossible to reach
 	const int UNATTAINABLE = 1000000;
 
@@ -46,6 +47,7 @@ public class LevelScript : MonoBehaviour {
 
 	//scripts
 	ScoreHandler scorehandler;
+	PlayerInput playerinput;
 
 
 
@@ -66,6 +68,7 @@ public class LevelScript : MonoBehaviour {
 
 
 		scorehandler = GameObject.Find ("scoretext").GetComponent<ScoreHandler> ();
+		playerinput = GameObject.Find ("GameController").GetComponent<PlayerInput>();
 	}
 
 
@@ -114,6 +117,10 @@ public class LevelScript : MonoBehaviour {
 			//l9
 			break;
 		case 11:
+			//l10
+			SetUpL10();
+			break;
+		case 12:
 			//l10
 			SetUpL10();
 			break;
@@ -526,6 +533,47 @@ public class LevelScript : MonoBehaviour {
 
 	}
 
+	void SetUpL11(){
+
+
+		fatOn = false;
+		hotDogOn = false;
+		cigOn = true;
+		ingredientsOn = false;
+		ingredientHolders = 0;
+		gridWidth = 8;
+		gridHeight = 8;
+		moves = UNATTAINABLE;
+		time = 40;
+		target = UNATTAINABLE;
+		boostersNeeded = UNATTAINABLE;
+		specBoostersNeeded = UNATTAINABLE;
+		gameoverMessage = "Some message saying how bad cigarettes are for you";
+		objectiveCiggy = true;
+
+
+
+		int[,] grid = {{  2, 1, 0, 4, 1, 1, 3, 0 },
+			{ 2, 4, 2, 2, 4, 4, 3, 0 },
+			{ 1, 2, 0, 1, 1, 0, 0, 3 },
+			{ 1, 0, 2, 1, 2, 2, 3, 0 },
+			{ 3, 1, 1, 2, 3, 0, 3, 0 },
+			{ 1, 4, 2, 1, 4, 1, 0, 3 },
+			{ 3, 2, 0, 1, 2, 1, 3, 0 },
+			{ 3, 4, 2, 3, 0, 0, 3, 0 }
+		}; 
+
+		SetGridContent (grid);
+
+		List<Vector2> cigPos = new List<Vector2> ();
+
+		for (int x = 0; x < gridWidth; x++) {
+			cigPos.Add (new Vector2 (x, 4));
+		}
+
+		SetCigPositions (cigPos);
+	}
+
 	
 	// Update is called once per frame
 	void Update () {
@@ -631,6 +679,7 @@ public class LevelScript : MonoBehaviour {
 		iTween.MoveTo (tu, iTween.Hash("y", 3.39, "time", 1));
 		Invoke ("CreateMenuButtons", 0.6f);
 		gameEnded = true;
+		playerinput.currentState = GameState.Animating;
 	}
 
 	public void OutOfMoves(){
@@ -640,7 +689,7 @@ public class LevelScript : MonoBehaviour {
 		Invoke ("CreateMenuButtons", 0.6f);
 		Debug.Log ("OUT OF MOVESSS");
 		gameEnded = true;
-
+		playerinput.currentState = GameState.Animating;
 	}
 
 	public void LevelPassed(){
@@ -650,6 +699,7 @@ public class LevelScript : MonoBehaviour {
 		iTween.MoveTo (lp, iTween.Hash("y", 3.39, "time", 1));
 		Invoke ("CreateMenuButtons", 0.6f);
 		gameEnded = true;
+		playerinput.currentState = GameState.Animating;
 	}
 
 

@@ -27,14 +27,14 @@ public class GameManager : MonoBehaviour {
 			Destroy (gameObject);
 
 		DontDestroyOnLoad (gameObject);
-
+		highscores = new int[numOfWeeks,levelsPerWeek];
 
 	}
 
 	void Start(){
 
 		//row: week	col: level in that week
-		highscores = new int[numOfWeeks,levelsPerWeek];
+
 		levelState = new bool[numOfWeeks,levelsPerWeek];
 
 		//Set all levels to locked
